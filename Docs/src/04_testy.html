@@ -1,0 +1,75 @@
+
+<section>
+<h1>7. Testowanie</h1>
+<p>Testy przeprowadzono na trzech poziomach:</p>
+<ol>
+  <li><b>Testy jednostkowe EditMode</b> (NUnit, Unity Test Framework) – logika niezależna od sceny: zapis, ranking, sklep, misje, osiągnięcia, punktacja, plan fal, model trudności, sesja gry.</li>
+  <li><b>Testy integracyjne PlayMode</b> – ładowanie prawdziwych scen w edytorze i sprawdzanie przepływu gry: Boot → menu, start poziomu, spawn wrogów, pauza, śmierć gracza → Game Over, ukończenie poziomu → odblokowanie kolejnego, utrzymanie wrogów w arenie, ciągłość fal.</li>
+  <li><b>Testy manualne na emulatorze Android</b> – AVD Android 14 (API 34, x86_64, 1080×2400, 420 dpi), sterowanie gestami wstrzykiwanymi przez ADB (<code>input tap</code>, <code>input motionevent</code>, <code>keyevent BACK</code>), zrzuty ekranu przez <code>adb exec-out screencap</code>.</li>
+</ol>
+<p>Wszystkie testy automatyczne można uruchomić skryptem <code>Tools/verify.ps1</code>, który generuje zawartość, uruchamia testy EditMode i PlayMode oraz buduje APK.</p>
+
+<h2>7.1 Przypadki testowe (manualne i automatyczne)</h2>
+<table>
+  <tr><th style="width:5%">ID</th><th style="width:15%">Test</th><th style="width:22%">Warunki / kroki</th><th style="width:22%">Oczekiwany rezultat</th><th style="width:24%">Weryfikacja</th><th style="width:12%">Wynik</th></tr>
+  <tr><td>T01</td><td>Start gry</td><td>Uruchomienie aplikacji</td><td>Ekran Boot z paskiem ładowania, potem menu główne</td><td>Emulator (rys. 1); PlayMode <code>Boot_LoadsMainMenu</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T02</td><td>Start poziomu</td><td>Graj → Poziom 1</td><td>Scena Level1, baner poziomu i odliczanie 3-2-1</td><td>Emulator (rys. 5)</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T03</td><td>Ruch gracza</td><td>Dotyk i przeciągnięcie w lewej dolnej części ekranu</td><td>Joystick pojawia się pod palcem, statek płynie w kierunku wychylenia</td><td>Emulator (<code>input motionevent</code>)</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T04</td><td>Kolizja</td><td>Kontakt z przeciwnikiem lub jego pociskiem</td><td>Utrata 1 HP, miganie, 1,2 s nietykalności</td><td>PlayMode <code>Player_DiesAndGameOverSceneLoads</code> (HP 3→2, kolejny cios zablokowany); emulator – utrata serc na poziomie 3</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T05</td><td>Moneta</td><td>Kontakt z monetą</td><td>+10 pkt, +1 moneta w HUD</td><td>Emulator – licznik monet i wyniku rośnie</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T06</td><td>Pauza</td><td>Przycisk pauzy</td><td>Panel PAUZA, gra zatrzymana</td><td>Emulator (rys. 7); PlayMode – <code>Time.timeScale == 0</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T07</td><td>Wznów</td><td>Przycisk WZNÓW</td><td>Gra kontynuowana od tego samego stanu</td><td>Emulator; PlayMode – <code>timeScale == 1</code>, stan Playing</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T08</td><td>Game Over</td><td>HP spada do 0</td><td>Animacja śmierci, ekran KONIEC GRY z wynikiem</td><td>Emulator (rys. 10, poziom 3); PlayMode</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T09</td><td>Zapis</td><td>Ukończenie poziomu</td><td>Rekord, odblokowany poziom i monety zapisane w <code>save.json</code></td><td>Emulator – po zamknięciu aplikacji rekord 2 265 i odblokowany poziom 2</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T10</td><td>Odczyt</td><td>Ponowne uruchomienie aplikacji</td><td>Rekord, monety, ustawienia i ranking odczytane</td><td>Emulator – <code>force-stop</code> i reinstalacja z zachowaniem danych; EditMode <code>SaveSystem_RoundTrips…</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T11</td><td>Dźwięk</td><td>Muzyka / Efekty = WYŁ.</td><td>Brak muzyki / efektów</td><td>Emulator – przełącznik zmienia stan i jest zapamiętany; wyciszenie parametrem AudioMixera −80 dB</td><td class="ok">Zaliczony (stan); odsłuch do potwierdzenia na telefonie</td></tr>
+  <tr><td>T12</td><td>Ustawienia</td><td>Zmiana głośności suwakiem</td><td>Wartość % się zmienia i zostaje zapamiętana</td><td>Emulator – 80% → 20%, wartość zachowana po ponownym wejściu</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T13</td><td>Level 2</td><td>Ukończenie poziomu 1</td><td>Podsumowanie z przyciskiem NASTĘPNY POZIOM, poziom 2 odblokowany</td><td>Emulator (rys. 9); PlayMode <code>Level1_ClearingAllWavesUnlocksLevel2</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T14</td><td>Restart</td><td>Pauza → RESTART POZIOMU</td><td>Poziom od nowa: czas 00:00, fala 0/3, wynik z początku poziomu, nowy układ przeszkód</td><td>Emulator; EditMode <code>GameSession_Restart…</code></td><td class="ok">Zaliczony (po poprawce)</td></tr>
+  <tr><td>T15</td><td>Wyjście</td><td>Przycisk WYJŚCIE</td><td>Aplikacja kończy działanie</td><td>Emulator – logcat: proces aplikacji zakończony</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T16</td><td>PULS</td><td>Przycisk PULS przy wrogach</td><td>Fala uderzeniowa: obrażenia i odrzut, radialny wskaźnik odnowienia</td><td>Emulator</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T17</td><td>Przycisk Wstecz</td><td>Systemowe „Wstecz” w opcjach pauzy i w Ustawieniach</td><td>Zamknięcie panelu / powrót do menu</td><td>Emulator (<code>keyevent 4</code>)</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T18</td><td>Przeszkody</td><td>Wróg i gracz po dwóch stronach filaru</td><td>Pociski zatrzymują się na filarze, wróg omija przeszkodę, fale się kończą</td><td>Emulator; PlayMode <code>Level2_IdlePlayerWavesKeepProgressing</code></td><td class="ok">Zaliczony (po poprawce)</td></tr>
+  <tr><td>T19</td><td>Ranking</td><td>Zakończenie gry</td><td>Wpis z nazwą, wynikiem, poziomem i datą</td><td>Emulator (rys. 13); EditMode <code>Leaderboard_…</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T20</td><td>Misje i osiągnięcia</td><td>Pokonanie 1. i 20. wroga</td><td>Powiadomienie, osiągnięcie „Pierwsza krew”, nagroda +50 monet</td><td>Emulator (rys. 6, monety 2 → 52); EditMode</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T21</td><td>Sklep</td><td>Zakup bez wystarczającej liczby monet / z monetami</td><td>Przycisk nieaktywny / odjęcie monet i działanie ulepszenia</td><td>Emulator (przyciski nieaktywne przy 52 monetach); EditMode <code>Shop_…</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T22</td><td>Rozdzielczość</td><td>Ekran 1080×2400 (20:9) z paskiem statusu</td><td>UI w strefie bezpiecznej, nic nie jest ucięte, przyciski ≥ 10 mm</td><td>Emulator (wszystkie zrzuty)</td><td class="ok">Zaliczony</td></tr>
+</table>
+
+<h2>7.2 Testy automatyczne</h2>
+<table>
+  <tr><th>Test</th><th>Rodzaj</th><th>Co sprawdza</th><th>Wynik</th></tr>
+  <tr><td><code>SaveSystem_RoundTripsProgressAndSettings</code></td><td>EditMode</td><td>zapis i odczyt JSON: rekord, poziomy, monety, ustawienia</td><td class="ok">OK</td></tr>
+  <tr><td><code>SaveSystem_RecoversFromCorruptedFileUsingDefaults</code></td><td>EditMode</td><td>uszkodzony plik zapisu → wartości domyślne zamiast awarii</td><td class="ok">OK</td></tr>
+  <tr><td><code>Leaderboard_KeepsTopTenSortedDescending</code></td><td>EditMode</td><td>ranking ma maks. 10 pozycji, sortowanie malejące</td><td class="ok">OK</td></tr>
+  <tr><td><code>Shop_BuyingDeductsCoinsAndRespectsMaxLevel</code></td><td>EditMode</td><td>zakup odejmuje monety, limit poziomu ulepszenia, efekt w loadoucie</td><td class="ok">OK</td></tr>
+  <tr><td><code>Shop_RefusesPurchaseWithoutCoins</code></td><td>EditMode</td><td>brak zakupu przy zbyt małej liczbie monet</td><td class="ok">OK</td></tr>
+  <tr><td><code>Missions_CompletingGrantsRewardAndRefillsSlots</code></td><td>EditMode</td><td>nagroda za misję i uzupełnienie do 3 aktywnych</td><td class="ok">OK</td></tr>
+  <tr><td><code>Achievements_UnlockOnce</code></td><td>EditMode</td><td>osiągnięcie odblokowuje się tylko raz</td><td class="ok">OK</td></tr>
+  <tr><td><code>ScoreRules_TimeBonusRewardsFasterClears</code></td><td>EditMode</td><td>bonus czasowy i punkty za typy wrogów</td><td class="ok">OK</td></tr>
+  <tr><td><code>WavePlanner_IsDeterministicForSeedAndRespectsUnlockWave</code></td><td>EditMode</td><td>powtarzalność dla ziarna, typy wrogów od właściwej fali</td><td class="ok">OK</td></tr>
+  <tr><td><code>DifficultyModel_StaysWithinBounds</code></td><td>EditMode</td><td>dynamiczna trudność w zakresie 0,8–1,4</td><td class="ok">OK</td></tr>
+  <tr><td><code>FinishRun_FlagsNewRecord…</code></td><td>EditMode</td><td>flaga „Nowy rekord” i wpis do rankingu</td><td class="ok">OK</td></tr>
+  <tr><td><code>GameSession_RestartRestoresScoreFromLevelStart</code></td><td>EditMode</td><td>restart przywraca wynik z początku poziomu</td><td class="ok">OK</td></tr>
+  <tr><td><code>Boot_LoadsMainMenu</code></td><td>PlayMode</td><td>Boot → MainMenu, otwarcie wyboru poziomu bez błędów</td><td class="ok">OK</td></tr>
+  <tr><td><code>SettingsScene_Loads</code></td><td>PlayMode</td><td>scena ustawień z otwartym panelem</td><td class="ok">OK</td></tr>
+  <tr><td><code>Level1_StartsSpawnsEnemiesAndPauses</code></td><td>PlayMode</td><td>start poziomu, 3 HP, spawn wrogów, pauza i wznowienie</td><td class="ok">OK</td></tr>
+  <tr><td><code>Player_DiesAndGameOverSceneLoads</code></td><td>PlayMode</td><td>obrażenia, nietykalność, śmierć → scena GameOver, statystyki</td><td class="ok">OK</td></tr>
+  <tr><td><code>Level1_ClearingAllWavesUnlocksLevel2</code></td><td>PlayMode</td><td>ukończenie wszystkich fal → odblokowanie poziomu 2, bonus 500</td><td class="ok">OK</td></tr>
+  <tr><td><code>Enemies_StayInsideArenaAfterStrongKnockback</code></td><td>PlayMode</td><td>test regresyjny: wrogowie nie wylatują poza arenę</td><td class="ok">OK</td></tr>
+  <tr><td><code>Level2_IdlePlayerWavesKeepProgressing</code></td><td>PlayMode</td><td>test regresyjny: fale poziomu 2 kończą się bez zawieszenia</td><td class="ok">OK</td></tr>
+  <tr><td><code>ReusedEnemyFromPool_HasFullSizeVisualAndIsNotDead</code></td><td>PlayMode</td><td>obiekt z puli wraca z poprawnym stanem animacji</td><td class="ok">OK</td></tr>
+</table>
+
+<h2>7.3 Błędy wykryte i naprawione podczas testów</h2>
+<table>
+  <tr><th style="width:28%">Objaw</th><th style="width:36%">Przyczyna</th><th>Poprawka</th></tr>
+  <tr><td>Wyjątek <code>NullReferenceException</code> przy wejściu do menu, przyciski wyboru poziomu nie działały</td><td>Generator UI nie zapisywał referencji przycisków w tablicy <code>levelButtons</code></td><td>Uzupełnienie przypisania; test PlayMode <code>Boot_LoadsMainMenu</code> otwiera panel wyboru poziomu</td></tr>
+  <tr><td>Fala nie kończyła się, licznik wrogów &gt; 0, a na ekranie brak przeciwników</td><td>PULS przy samej ścianie „przepychał” wroga przez cienki (0,3 j.) collider ściany</td><td>Collidery ścian o grubości 2 j. skierowane na zewnątrz, ciągła detekcja kolizji wrogów, zabezpieczenie <code>KeepInsideArena</code>, słabszy odrzut; test regresyjny <code>Enemies_StayInsideArenaAfterStrongKnockback</code></td></tr>
+  <tr><td>Łowca „zawieszał się” za filarem; statek strzelał w filar</td><td>Brak omijania przeszkód i sprawdzania linii strzału</td><td><code>AvoidObstacles</code> (CircleCast + ruch wzdłuż krawędzi), wybór celu z linią wzroku (<code>FindNearestVisible</code>)</td></tr>
+  <tr><td>Żywy Dryfer miał zmniejszony do kropki sprite</td><td>Po powrocie z puli Animator mógł zachować skalę z animacji śmierci (kolejność ponownego wiązania na urządzeniu)</td><td>Reset stanu wizualnego i <code>Animator.Rebind()</code> przed zwrotem do puli oraz zabezpieczenie w <code>Think()</code></td></tr>
+  <tr><td>Nagroda za misję znikała po zamknięciu aplikacji</td><td>Zapis tylko na końcu poziomu</td><td>Zapis przy pauzie aplikacji (<code>AppLifecycle</code>), po ukończeniu misji i odblokowaniu osiągnięcia</td></tr>
+  <tr><td>Po restarcie poziomu wynik startował od 100 pkt</td><td>Scena działała jeszcze podczas wygaszania ekranu i naliczała punkty</td><td><code>SceneLoader</code> zatrzymuje czas gry (<code>timeScale = 0</code>) na czas przejścia</td></tr>
+  <tr><td>Długa nazwa w sklepie nachodziła na opis</td><td>Za wąska kolumna nazwy</td><td>Poprawiony układ wiersza sklepu</td></tr>
+</table>
+</section>

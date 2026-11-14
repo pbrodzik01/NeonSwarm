@@ -1,0 +1,136 @@
+
+<section>
+<h1>5. Projekt interfejsu użytkownika</h1>
+<p>Interfejs zbudowano w Unity UI (uGUI). Każdy ekran ma <code>Canvas</code> w trybie <i>Screen Space – Overlay</i> z <code>CanvasScaler</code> (<i>Scale With Screen Size</i>, rozdzielczość referencyjna 1080×1920, dopasowanie 0,5), więc UI skaluje się na ekranach od 16:9 do 20:9. Elementy interaktywne leżą wewnątrz komponentu <code>SafeArea</code>, który omija wycięcia ekranu i pasek systemowy. Przyciski mają co najmniej 120 px wysokości w rozdzielczości referencyjnej (ok. 10 mm na telefonie), a przycisk PULS ma 240 px. Kolorystyka jest neonowa na ciemnym tle: cyjan to akcje główne, zielony – start i wznowienie, złoty – sklep i monety, czerwony – wyjście i niebezpieczeństwo. Zrzuty wykonano na emulatorze Android 14 (1080×2400).</p>
+<div class="shots">
+  <figure><img src="../shots/02_menu.png"><figcaption>Rys. 1. Ekran startowy: nazwa gry, rekord, monety i przyciski Graj, Instrukcja, Ustawienia, Sklep, Ranking, Misje i Wyjście</figcaption></figure>
+  <figure><img src="../shots/03_wybor_poziomu.png"><figcaption>Rys. 2. Wybór poziomu: poziomy 2 i 3 są zablokowane do czasu ukończenia poprzedniego</figcaption></figure>
+  <figure><img src="../shots/04_instrukcja.png"><figcaption>Rys. 3. Instrukcja: cel, sterowanie, przeciwnicy, przedmioty i punktacja</figcaption></figure>
+</div>
+<div class="shots">
+  <figure><img src="../shots/05_ustawienia.png"><figcaption>Rys. 4. Scena Settings: muzyka, efekty, głośność, wibracje, tryb 30 FPS, licznik FPS, nazwa gracza i reset postępu</figcaption></figure>
+  <figure><img src="../shots/06_gra_odliczanie.png"><figcaption>Rys. 5. Start poziomu: nazwa poziomu i odliczanie 3-2-1</figcaption></figure>
+  <figure><img src="../shots/07_gra_walka.png"><figcaption>Rys. 6. Rozgrywka: HUD (wynik, poziom, fala, HP, czas, monety), joystick, przycisk PULS i powiadomienie o osiągnięciu</figcaption></figure>
+</div>
+<div class="shots">
+  <figure><img src="../shots/08_pauza.png"><figcaption>Rys. 7. Pauza: WZNÓW, OPCJE, RESTART POZIOMU, MENU; gra jest zatrzymana (timeScale = 0)</figcaption></figure>
+  <figure><img src="../shots/09_opcje.png"><figcaption>Rys. 8. Opcje otwarte z pauzy (ten sam komponent SettingsPanel co w scenie Settings)</figcaption></figure>
+  <figure><img src="../shots/11_poziom_ukonczony.png"><figcaption>Rys. 9. Podsumowanie poziomu z bonusami i przejściem do następnego poziomu</figcaption></figure>
+</div>
+<div class="shots">
+  <figure><img src="../shots/12_game_over.png"><figcaption>Rys. 10. Ekran Game Over: wynik, rekord, statystyki i miejsce w rankingu</figcaption></figure>
+  <figure><img src="../shots/13_sklep.png"><figcaption>Rys. 11. Sklep: skórki, broń, ulepszenia i power-upy za monety</figcaption></figure>
+  <figure><img src="../shots/15_misje.png"><figcaption>Rys. 12. Misje z paskiem postępu i nagrodą oraz lista osiągnięć</figcaption></figure>
+</div>
+<div class="shots">
+  <figure><img src="../shots/14_ranking.png"><figcaption>Rys. 13. Ranking: nazwa gracza, wynik, poziom i data</figcaption></figure>
+  <figure><img src="../shots/18_poziom3.png"><figcaption>Rys. 14. Poziom 3: wszystkie trzy typy przeciwników, bonusy (turbo, monety) i utrata HP</figcaption></figure>
+  <figure><img src="../shots/17_restart.png"><figcaption>Rys. 15. Restart poziomu: nowy, proceduralnie wygenerowany układ przeszkód</figcaption></figure>
+</div>
+<h2>5.1 Elementy HUD</h2>
+<table>
+  <tr><th>Element</th><th>Położenie</th><th>Opis</th></tr>
+  <tr><td>Wynik</td><td>lewy górny róg</td><td>aktualizowany zdarzeniem <code>ScoreChanged</code>, a nie w każdej klatce</td></tr>
+  <tr><td>Poziom i fala</td><td>środek paska</td><td>„POZIOM 1/3”, „FALA 2/3”, a przy starcie fali duży baner</td></tr>
+  <tr><td>Życie (HP)</td><td>pod wynikiem</td><td>ikony serc (pełne i puste), maks. 6</td></tr>
+  <tr><td>Czas</td><td>środek dolnej części paska</td><td>mm:ss; tekst zmienia się tylko przy zmianie pełnej sekundy</td></tr>
+  <tr><td>Monety</td><td>prawa strona paska</td><td>stan portfela</td></tr>
+  <tr><td>Stan gry</td><td>pod paskiem i na środku</td><td>TEMPO (dynamiczna trudność), liczba wrogów w fali, wskaźniki tarczy i turbo z czasem, banery i odliczanie</td></tr>
+  <tr><td>Pauza</td><td>prawy górny róg</td><td>okrągły przycisk 130 px</td></tr>
+  <tr><td>Joystick i PULS</td><td>dolne rogi</td><td>joystick pływający; PULS z radialnym wskaźnikiem odnowienia</td></tr>
+</table>
+</section>
+
+<section>
+<h1>6. Implementacja – najważniejsze klasy C#</h1>
+<table>
+  <tr><th style="width:24%">Klasa</th><th>Odpowiedzialność</th></tr>
+  <tr><td><code>GameManager</code></td><td>Maszyna stanów poziomu (Intro → Playing ⇄ Paused → LevelComplete / GameOver). Uruchamia generator areny, fale, bonusy i trudność; obsługuje pauzę (<code>Time.timeScale = 0</code>, pauza dźwięków), <code>OnApplicationPause</code>, przycisk Wstecz, warunki zwycięstwa i przegranej oraz zapis wyników.</td></tr>
+  <tr><td><code>WaveSpawner</code>, <code>WavePlanner</code></td><td>Korutyna fal: wylicza rozmiar fali (bazowy × TEMPO), losuje jej skład z wagami (ziarno <code>System.Random</code>), wybiera punkt na krawędzi z dala od gracza, pokazuje portal i spawnuje wroga z puli. Fala kończy się, gdy nie ma żywych ani oczekujących wrogów.</td></tr>
+  <tr><td><code>DifficultyDirector</code>, <code>DifficultyModel</code></td><td>Dynamiczna trudność: co 4 s ocena HP, zabójstw na minutę i czasu od trafienia; intensywność 0,8–1,4 zmienia prędkość, odstępy spawnu, szybkostrzelność i liczebność.</td></tr>
+  <tr><td><code>ArenaGenerator</code></td><td>Granice areny i proceduralne rozmieszczenie filarów (rejection sampling), punkty spawnu.</td></tr>
+  <tr><td><code>Player</code> + <code>PlayerController</code>, <code>PlayerHealth</code>, <code>PlayerShooter</code>, <code>PlayerPulse</code></td><td>Fasada gracza nakładająca ulepszenia ze sklepu (<code>PlayerLoadout</code>); ruch z joysticka po <code>Rigidbody2D</code>; HP z nietykalnością, tarczą i śmiercią; auto-celowanie w najbliższego wroga (<code>EnemyRegistry</code>) i strzał z puli; fala uderzeniowa przez <code>OverlapCircleNonAlloc</code>.</td></tr>
+  <tr><td><code>EnemyBase</code> + 3 podklasy</td><td>Wspólne HP, obrażenia kontaktowe, animacje, drop monet, punktacja i powrót do puli. Podklasy implementują tylko <code>Think()</code> (decyzje co 0,2 s) i <code>Tick()</code> (ruch, strzał).</td></tr>
+  <tr><td><code>Projectile</code></td><td>Pocisk z puli: prędkość kinematyczna, czas życia, trafienie przez interfejs <code>IDamageable</code>.</td></tr>
+  <tr><td><code>Pickup</code> + 4 podklasy</td><td>Wzorzec <i>template method</i>: baza obsługuje trigger, czas życia, miganie i magnes, a podklasy tylko metodę <code>Apply(Player)</code>.</td></tr>
+  <tr><td><code>PoolManager</code>, <code>ObjectPool</code>, <code>Poolable</code></td><td>Pule obiektów indeksowane prefabem, z rozgrzaniem (prewarm) przy starcie poziomu.</td></tr>
+  <tr><td><code>SaveSystem</code>, <code>SaveData</code></td><td>Zapis JSON (<code>JsonUtility</code>) do <code>persistentDataPath</code>: zapis atomowy przez plik tymczasowy, kopia <code>.bak</code>, odczyt z odtworzeniem domyślnych wartości po uszkodzeniu pliku.</td></tr>
+  <tr><td><code>ProgressTracker</code>, <code>MissionService</code>, <code>AchievementService</code>, <code>ShopService</code>, <code>Leaderboard</code></td><td>Logika metagry w czystych klasach C# (testowalnych w EditMode): monety, misje, osiągnięcia, zakupy, ranking top 10.</td></tr>
+  <tr><td><code>AudioManager</code></td><td>Singleton z AudioMixerem (parametry <code>MasterVolume</code>, <code>MusicVolume</code>, <code>SFXVolume</code> w dB), źródłem muzyki z płynnym przejściem, pulą 10 źródeł SFX i ograniczeniem powtórzeń tego samego dźwięku.</td></tr>
+  <tr><td><code>SceneLoader</code>, <code>SystemsBootstrap</code></td><td>Asynchroniczne ładowanie scen z przyciemnieniem; automatyczne tworzenie trwałych systemów przed pierwszą sceną.</td></tr>
+  <tr><td><code>Hud</code>, <code>VirtualJoystick</code>, <code>PauseMenu</code>, <code>SettingsPanel</code>, <code>MainMenu</code>, <code>GameOverScreen</code></td><td>Ekrany UI. Każdy ma metodę <code>BuildUI()</code>, którą generator wywołuje w edytorze, a referencje zapisują się jako pola <code>[SerializeField]</code> w scenie.</td></tr>
+  <tr><td><code>ProjectBuilder</code> (edytor)</td><td>Generuje sprite’y (SDF), dźwięki (synteza WAV), AudioMixer, klipy i kontrolery animacji, prefaby, poziomy (ScriptableObject) i sceny; konfiguruje warstwy, tagi, Player Settings i jakość.</td></tr>
+</table>
+
+<h2>6.1 Wybrane fragmenty kodu</h2>
+<h3>Zbieranie przedmiotu (trigger) – <code>Pickup</code> i <code>CoinPickup</code></h3>
+<pre>private void OnTriggerEnter2D(Collider2D other)
+{
+    if (collected || !other.CompareTag(Tags.Player) || !other.TryGetComponent&lt;Player&gt;(out var player) || !player.Health.IsAlive)
+        return;
+    collected = true;
+    Apply(player);                       // metoda abstrakcyjna, np. CoinPickup:
+    Fx.Sparkle(transform.position, color);
+    GameEvents.RaisePickupCollected(Kind);
+    Release();                           // powrót do puli zamiast Destroy()
+}
+
+protected override void Apply(Player player)   // CoinPickup
+{
+    ScoreManager.Add(ScoreRules.Coin, transform.position);   // +10 pkt
+    ProgressTracker.AddCoins(1);
+    AudioManager.Play(SfxId.Coin, 0.8f);
+}</pre>
+
+<h3>Pula obiektów – <code>ObjectPool.Get</code></h3>
+<pre>public Poolable Get(Vector3 position, Quaternion rotation)
+{
+    var item = free.Count &gt; 0 ? free.Pop() : Create();
+    item.transform.SetPositionAndRotation(position, rotation);
+    item.IsInPool = false;
+    item.gameObject.SetActive(true);   // OnEnable resetuje stan (HP, animator)
+    return item;
+}</pre>
+
+<h3>Obrażenia i nietykalność gracza – <code>PlayerHealth.TakeDamage</code></h3>
+<pre>if (IsShielded) { Fx.Hit(transform.position, shieldColor); return; }
+if (Time.time &lt; invulnerableUntil) return;
+current = Mathf.Max(0, current - amount);
+invulnerableUntil = Time.time + hitInvulnerability;   // 1,2 s migania
+rigidBody.AddForce(knockback, ForceMode2D.Impulse);
+animator.SetTrigger(HurtHash);
+AudioManager.Play(SfxId.PlayerHurt);
+GameEvents.RaisePlayerHealthChanged(current, max);
+if (current == 0) Die();                              // Animator: Dead = true</pre>
+
+<h3>Losowanie składu fali – <code>WavePlanner.PlanWave</code></h3>
+<pre>while (plan.Count &lt; count)
+{
+    var roll = random.Next(totalWeight);           // ziarno → powtarzalność (testy)
+    foreach (var entry in available)               // tylko typy odblokowane w tej fali
+    {
+        roll -= entry.weight;
+        if (roll &lt; 0) { plan.Add(entry.kind); break; }
+    }
+}</pre>
+
+<h3>Ustawienia dźwięku przez AudioMixer – <code>AudioManager.ApplySettings</code></h3>
+<pre>mixer.SetFloat("MasterVolume", LinearToDb(settings.volume));   // 20·log10(v)
+mixer.SetFloat("MusicVolume", settings.music ? 0f : -80f);
+mixer.SetFloat("SFXVolume",   settings.sfx   ? 0f : -80f);</pre>
+
+<h3>Zapis do JSON – <code>SaveSystem.Save</code></h3>
+<pre>var json = JsonUtility.ToJson(data, true);
+File.WriteAllText(path + ".tmp", json);          // najpierw plik tymczasowy
+if (File.Exists(path)) { File.Copy(path, path + ".bak", true); File.Delete(path); }
+File.Move(path + ".tmp", path);                  // podmiana – brak uszkodzonego zapisu</pre>
+<p>Przykładowy fragment pliku <code>save.json</code>:</p>
+<pre>{ "version": 1, "bestScore": 2500, "unlockedLevels": 3, "coins": 125,
+  "settings": { "music": true, "sfx": true, "volume": 0.8, "vibration": true,
+                "batterySaver": false, "showFps": false, "playerName": "Pilot" },
+  "stats": { "totalKills": 64, "totalCoins": 180, "levelsCompleted": 4, ... },
+  "leaderboard": [ { "name": "Pilot", "score": 2500, "level": 3, "date": "2026-11-14 11:20" } ],
+  "achievements": [ "a_first_blood", "a_untouchable" ],
+  "missions": [ { "id": "m_coins30", "progress": 12 }, ... ],
+  "ownedItems": [ "skin_classic", "upg_magnet" ], "selectedSkin": "skin_classic" }</pre>
+</section>

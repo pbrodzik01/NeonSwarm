@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b7d314e2b2a99744abdb3ceba75d95e, type: 3}
+  m_Name: FxLibrary
+  m_EditorClassIdentifier: 
+  explosion: {fileID: 6400418443554428417, guid: 2db71b32adb6e864b91cd098f4d6ac09, type: 3}
+  hitSpark: {fileID: 1695803479962125073, guid: a8e5185d0efc95d4894303276bf8d72f, type: 3}
+  sparkle: {fileID: 118865164647033165, guid: 17324492474c60641a0bb0c42e95528a, type: 3}
+  pulseRing: {fileID: 1661304454731626770, guid: 9d6ec0dbfa7ab074ab92b4fbf229426f, type: 3}
+  spawnPortal: {fileID: 861895060170641300, guid: 2a1e622c7a51ad34382ab365674dc648, type: 3}
+  floatingText: {fileID: 6812501662428271473, guid: 36e19fb89ee12aa4880f5897844f0622, type: 3}

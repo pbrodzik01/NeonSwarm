@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f8286222f8c8b247bd537c6f256ee16, type: 3}
+  m_Name: Level3
+  m_EditorClassIdentifier: 
+  levelIndex: 2
+  title: Poziom 3
+  subtitle: Serce roju
+  difficultyLabel: trudna
+  accent: {r: 1, g: 0.55, b: 0.15, a: 1}
+  waves: 3
+  enemiesFirstWave: 10
+  enemiesPerWave: 2
+  spawnInterval: 0.85
+  wavePause: 2.5
+  maxAlive: 11
+  speedMultiplier: 1.6
+  fireRateMultiplier: 1.3
+  enemies:
+  - kind: 0
+    weight: 1
+    fromWave: 1
+  - kind: 1
+    weight: 3
+    fromWave: 1
+  - kind: 2
+    weight: 2
+    fromWave: 1
+  obstacleCount: 4
+  pickupInterval: 12
+  coinDropChance: 0.5
+  parTimeSeconds: 150

@@ -1,0 +1,43 @@
+
+<section>
+<h1>8. Optymalizacja</h1>
+<p>Zastosowano dziewięć technik optymalizacji (wymagane były co najmniej trzy):</p>
+<table>
+  <tr><th style="width:26%">Technika</th><th>Realizacja w projekcie</th><th style="width:22%">Efekt</th></tr>
+  <tr><td><b>Object pooling</b></td><td><code>PoolManager</code>/<code>ObjectPool</code> dla pocisków gracza (prewarm 30) i wrogów (20), przeciwników (3×8), monet i bonusów, efektów cząsteczkowych i napisów „+100”. Obiekty są wyłączane i ponownie używane, a nie niszczone (<code>Destroy</code>) i tworzone (<code>Instantiate</code>) w czasie gry.</td><td>brak alokacji i skoków GC podczas walki</td></tr>
+  <tr><td><b>Ograniczenie pracy w <code>Update()</code></b></td><td>AI wrogów podejmuje decyzje co 0,2 s z losowym przesunięciem fazy (<code>Think()</code>), a dynamiczna trudność liczy się co 4 s. HUD aktualizuje wynik, HP i monety przez zdarzenia, a czas tylko przy zmianie sekundy. Hashe parametrów Animatora (<code>Animator.StringToHash</code>) i komponenty są cache’owane w <code>Awake</code>.</td><td>mniej pracy na klatkę, mniej alokacji stringów</td></tr>
+  <tr><td><b>Rejestr wrogów zamiast wyszukiwania</b></td><td><code>EnemyRegistry</code> (lista aktywnych wrogów) zamiast <code>FindObjectsOfType</code>; wyszukiwanie najbliższego celu porównuje kwadraty odległości (<code>sqrMagnitude</code>, bez pierwiastka).</td><td>O(n) bez skanowania sceny</td></tr>
+  <tr><td><b>Fizyka bez alokacji</b></td><td>PULS używa <code>Physics2D.OverlapCircleNonAlloc</code> ze stałym buforem. Macierz kolizji warstw wyłącza zbędne pary (np. pocisk–pocisk, pocisk–przedmiot). Pociski są kinematyczne.</td><td>mniej par kolizji do sprawdzenia</td></tr>
+  <tr><td><b>Atlas sprite’ów</b></td><td>Wszystkie sprite’y gry i UI (oprócz kafelkowanego tła) trafiają do jednego <i>Sprite Atlas</i>.</td><td>batching: mniej draw calls</td></tr>
+  <tr><td><b>Kompresja i optymalizacja tekstur</b></td><td>ASTC 6×6 dla Androida, wyłączone mipmapy (gra 2D w stałej skali), rozmiary 32–256 px, maksymalny rozmiar tekstury równy rozmiarowi źródła.</td><td>mniejszy APK i zużycie VRAM</td></tr>
+  <tr><td><b>Kompresja audio</b></td><td>Efekty: ADPCM, mono, <i>Decompress On Load</i> (krótkie, odtwarzane bez opóźnień). Muzyka: Vorbis (jakość 45%), mono, <i>Streaming</i>, ładowanie w tle. Pula 10 źródeł <code>AudioSource</code> z ograniczeniem powtórzeń tego samego dźwięku (np. strzał nie częściej niż co 60 ms).</td><td>mniej RAM i CPU na audio</td></tr>
+  <tr><td><b>Ustawienia jakości i renderowania</b></td><td>Wyłączone cienie, antyaliasing, oświetlenie pikselowe, odbicia i miękkie cząsteczki. Przestrzeń kolorów Gamma, OpenGL ES 3, wielowątkowe renderowanie, <i>Optimized Frame Pacing</i>, <code>targetFrameRate</code> 60 (30 w trybie oszczędzania baterii), brak HDR i MSAA w kamerze.</td><td>stabilne 60 FPS, niższe zużycie baterii</td></tr>
+  <tr><td><b>Limity efektów i budowy</b></td><td>Maks. 6 efektów nieistotnych (iskry, napisy) na klatkę, maksymalna liczba jednoczesnych wrogów na poziom (6/8/11), <code>maxParticles</code> ograniczone do 2× wielkości wybuchu. IL2CPP z <i>Managed Stripping</i> (Low), usunięte zbędne pakiety (Ads, IAP, Analytics, Timeline, TextMeshPro), osobne assembly definitions.</td><td>przewidywalne obciążenie, APK 25 MB</td></tr>
+</table>
+<p>Wydajność można kontrolować wbudowanym licznikiem FPS (Ustawienia → Licznik FPS), który pokazuje też liczbę pul i obiektów w pulach.</p>
+</section>
+
+<section>
+<h1>9. Podsumowanie</h1>
+<h2>9.1 Wnioski</h2>
+<p>Zrealizowano kompletną grę mobilną na Androida, która spełnia wszystkie wymagania podstawowe projektu (ekran startowy, sterowanie dotykowe, punktacja, przeciwnicy i przeszkody, warunki zwycięstwa i przegranej, HP i Game Over, 3 poziomy o rosnącej trudności, HUD, pauza, zapis, dźwięk z AudioMixerem, ustawienia, animacje w Animatorze, fizyka 2D, przedmioty, optymalizacja, testy). Zrealizowano też wszystkie pozycje A–I z listy wymagań dodatkowych: ranking, osiągnięcia, sklep, walutę, dynamiczną trudność, lokalną tabelę wyników, proceduralne generowanie, object pooling i misje.</p>
+<p>Najważniejsze wnioski z realizacji:</p>
+<ul>
+  <li>Sterowanie na jeden kciuk (pływający joystick + automatyczny ogień) dobrze sprawdza się na małym ekranie. Decyzja taktyczna została przeniesiona na ruch i moment użycia PULSU.</li>
+  <li>Szyna zdarzeń (<code>GameEvents</code>) bardzo uprościła dodawanie funkcji metagry: misje, osiągnięcia i dynamiczna trudność nie wymagały zmian w klasach gracza ani przeciwników.</li>
+  <li>Wydzielenie logiki do czystych klas C# (sklep, misje, ranking, plan fal, model trudności, zapis) pozwoliło pokryć ją szybkimi testami EditMode. Testy PlayMode wykryły realne błędy integracji, np. niepodpięte referencje przycisków wyboru poziomu.</li>
+  <li>Testy na emulatorze ujawniły problem, którego nie widać w testach jednostkowych: fala uderzeniowa przy samej ścianie potrafiła „przepchnąć” przeciwnika przez cienki collider, przez co fala nie mogła się zakończyć. Rozwiązanie: grubsze collidery ścian, ciągła detekcja kolizji wrogów i zabezpieczenie utrzymujące obiekty w granicach areny (oraz test regresyjny).</li>
+  <li>Generowanie zawartości kodem (grafika SDF, synteza dźwięku, sceny i prefaby) daje w pełni odtwarzalny projekt bez zewnętrznych zasobów i problemów licencyjnych.</li>
+</ul>
+<h2>9.2 Możliwe kierunki rozwoju</h2>
+<ul>
+  <li>Ranking online i konta graczy (REST API, np. własny serwer lub Unity Gaming Services), zapis w chmurze.</li>
+  <li>Walka z bossem na końcu poziomu 3 i więcej typów przeciwników (np. dzielący się rój, kamikaze).</li>
+  <li>Tryb nieskończony z proceduralnymi falami i rosnącą trudnością.</li>
+  <li>Grafika ręcznie rysowana lub efekty postprocessingu (bloom) przy przejściu na URP 2D.</li>
+  <li>Lokalizacja (angielski) oraz opcje dostępności: tryb dla daltonistów, większy joystick, joystick stały zamiast pływającego.</li>
+  <li>Publikacja w Google Play: Android App Bundle, podpis produkcyjny, analityka i raporty błędów.</li>
+</ul>
+</section>
+</body>
+</html>

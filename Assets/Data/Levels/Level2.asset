@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f8286222f8c8b247bd537c6f256ee16, type: 3}
+  m_Name: Level2
+  m_EditorClassIdentifier: 
+  levelIndex: 1
+  title: Poziom 2
+  subtitle: "Gniazdo \u0142owc\xF3w"
+  difficultyLabel: "\u015Brednia"
+  accent: {r: 1, g: 0.24, b: 0.8, a: 1}
+  waves: 3
+  enemiesFirstWave: 6
+  enemiesPerWave: 1
+  spawnInterval: 1
+  wavePause: 2.5
+  maxAlive: 8
+  speedMultiplier: 1.3
+  fireRateMultiplier: 1
+  enemies:
+  - kind: 0
+    weight: 2
+    fromWave: 1
+  - kind: 1
+    weight: 3
+    fromWave: 1
+  - kind: 2
+    weight: 1
+    fromWave: 2
+  obstacleCount: 3
+  pickupInterval: 11
+  coinDropChance: 0.55
+  parTimeSeconds: 110

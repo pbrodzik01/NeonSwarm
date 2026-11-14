@@ -1,0 +1,160 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: NeonSwarm
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 0
+      compressionQuality: 0
+      maxTextureSize: 0
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 0
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 6fbd7bfd4baa09d48a46a2eebff250c7, type: 3}
+    - {fileID: 102900000, guid: cf81e10d067613645b26cc279aed7cb5, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - 9c1313909079ee3419a326fce54f196d: 21300000
+    - 038c02a03d15f444d83bd88479548907: 21300000
+    - 21a3dea066a941c44aee06486bee6978: 21300000
+    - 083669e0697764d4baec233a8b2d92de: 21300000
+    - 62719381dc1b52e4194d1c97fddc1e1c: 21300000
+    - ea7e1024df6578b4fbb904d72382a77a: 21300000
+    - 14d88a94e9f3a2d46bff8d5bf68a3123: 21300000
+    - edf9d4d4f857c9143984fb7a58a96a80: 21300000
+    - 7162b005e39877c4197e784c5738d9b6: 21300000
+    - 5db46e65b9a5e8d488948278d046b8ec: 21300000
+    - d4e92f06faa1138498f21b1ffe701fce: 21300000
+    - f38fd516da0d47340845dcdc9e96b725: 21300000
+    - a9051ee6e47a2a343bc4c6300a761c31: 21300000
+    - 6fc834f60b016b844af062c19651be68: 21300000
+    - ba150e07b32d1de4ebfb341e6fdf21bc: 21300000
+    - 741e20179f22e574ebedcf075e754a98: 21300000
+    - bcd5d419539ffde468dec809b5ac06b0: 21300000
+    - c5f11c1971d672742be1aaa3c76061da: 21300000
+    - e6e7f0b92926b8d44ac0bf2edc73dd88: 21300000
+    - 8684c07a2300513428abe2fb461be439: 21300000
+    - f50001ba6a1f5674391407cbed1c7328: 21300000
+    - 03a4ebea5d97ff142847eccaea079527: 21300000
+    - b86bbeab8fb98f84caa09c2dd82a35fb: 21300000
+    - f97652ebe745a5548a6e8db0285e63b0: 21300000
+    - 9a3e655c618f3a447bb0fe7d9cc700ac: 21300000
+    - 696dc28ce3557424cb1894472dbd37a0: 21300000
+    - c14ceddc968cbf24a8e56b6f6f069f92: 21300000
+    - 6736037d2771c6a40a562190ee9a1d59: 21300000
+    - 2e8e398d0b759fa4182c470c3218fac8: 21300000
+    - 6ab1cf8d3bccd7f4a834f29e569b437c: 21300000
+    - 65b6dfcdda650de40b1ed2c838b5cca8: 21300000
+    - a256b4dd30202e0408b8b0812e7bb678: 21300000
+    - cb8d0e6e41514fd499706791968bd2e3: 21300000
+    - d0f7e20ffa957254d8f41737a00088a4: 21300000
+    - 0a0ff11f0ed50834380580c56dc4256a: 21300000
+    - 8706cf4ff59457f48bf4b0c8c0787c49: 21300000
+    - ca292eaf415a3524d8bb92e53d51f376: 21300000
+    - aec716bfc09b7a94a93fa3b46ec8c7ec: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 9c1313909079ee3419a326fce54f196d, type: 3}
+  - {fileID: 21300000, guid: 038c02a03d15f444d83bd88479548907, type: 3}
+  - {fileID: 21300000, guid: 21a3dea066a941c44aee06486bee6978, type: 3}
+  - {fileID: 21300000, guid: 083669e0697764d4baec233a8b2d92de, type: 3}
+  - {fileID: 21300000, guid: 62719381dc1b52e4194d1c97fddc1e1c, type: 3}
+  - {fileID: 21300000, guid: ea7e1024df6578b4fbb904d72382a77a, type: 3}
+  - {fileID: 21300000, guid: 14d88a94e9f3a2d46bff8d5bf68a3123, type: 3}
+  - {fileID: 21300000, guid: edf9d4d4f857c9143984fb7a58a96a80, type: 3}
+  - {fileID: 21300000, guid: 7162b005e39877c4197e784c5738d9b6, type: 3}
+  - {fileID: 21300000, guid: 5db46e65b9a5e8d488948278d046b8ec, type: 3}
+  - {fileID: 21300000, guid: d4e92f06faa1138498f21b1ffe701fce, type: 3}
+  - {fileID: 21300000, guid: f38fd516da0d47340845dcdc9e96b725, type: 3}
+  - {fileID: 21300000, guid: a9051ee6e47a2a343bc4c6300a761c31, type: 3}
+  - {fileID: 21300000, guid: 6fc834f60b016b844af062c19651be68, type: 3}
+  - {fileID: 21300000, guid: ba150e07b32d1de4ebfb341e6fdf21bc, type: 3}
+  - {fileID: 21300000, guid: 741e20179f22e574ebedcf075e754a98, type: 3}
+  - {fileID: 21300000, guid: bcd5d419539ffde468dec809b5ac06b0, type: 3}
+  - {fileID: 21300000, guid: c5f11c1971d672742be1aaa3c76061da, type: 3}
+  - {fileID: 21300000, guid: e6e7f0b92926b8d44ac0bf2edc73dd88, type: 3}
+  - {fileID: 21300000, guid: 8684c07a2300513428abe2fb461be439, type: 3}
+  - {fileID: 21300000, guid: f50001ba6a1f5674391407cbed1c7328, type: 3}
+  - {fileID: 21300000, guid: 03a4ebea5d97ff142847eccaea079527, type: 3}
+  - {fileID: 21300000, guid: b86bbeab8fb98f84caa09c2dd82a35fb, type: 3}
+  - {fileID: 21300000, guid: f97652ebe745a5548a6e8db0285e63b0, type: 3}
+  - {fileID: 21300000, guid: 9a3e655c618f3a447bb0fe7d9cc700ac, type: 3}
+  - {fileID: 21300000, guid: 696dc28ce3557424cb1894472dbd37a0, type: 3}
+  - {fileID: 21300000, guid: c14ceddc968cbf24a8e56b6f6f069f92, type: 3}
+  - {fileID: 21300000, guid: 6736037d2771c6a40a562190ee9a1d59, type: 3}
+  - {fileID: 21300000, guid: 2e8e398d0b759fa4182c470c3218fac8, type: 3}
+  - {fileID: 21300000, guid: 6ab1cf8d3bccd7f4a834f29e569b437c, type: 3}
+  - {fileID: 21300000, guid: 65b6dfcdda650de40b1ed2c838b5cca8, type: 3}
+  - {fileID: 21300000, guid: a256b4dd30202e0408b8b0812e7bb678, type: 3}
+  - {fileID: 21300000, guid: cb8d0e6e41514fd499706791968bd2e3, type: 3}
+  - {fileID: 21300000, guid: d0f7e20ffa957254d8f41737a00088a4, type: 3}
+  - {fileID: 21300000, guid: 0a0ff11f0ed50834380580c56dc4256a, type: 3}
+  - {fileID: 21300000, guid: 8706cf4ff59457f48bf4b0c8c0787c49, type: 3}
+  - {fileID: 21300000, guid: ca292eaf415a3524d8bb92e53d51f376, type: 3}
+  - {fileID: 21300000, guid: aec716bfc09b7a94a93fa3b46ec8c7ec, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - medkit
+  - ui_rounded
+  - ui_circle
+  - heart
+  - joystick_base
+  - ui_outline
+  - icon_trophy
+  - ship
+  - bullet_player
+  - core
+  - enemy_shooter
+  - bullet_enemy
+  - enemy_chaser
+  - muzzle
+  - icon_pause
+  - shield_bubble
+  - thruster_small_1
+  - enemy_shooter_flash
+  - coin
+  - rapid
+  - icon_pulse
+  - thruster_big_0
+  - heart_empty
+  - enemy_drifter_flash
+  - portal
+  - icon_lock
+  - wall
+  - ship_flash
+  - thruster_small_0
+  - icon_star
+  - pillar
+  - thruster_big_1
+  - shield
+  - joystick_knob
+  - ring
+  - enemy_chaser_flash
+  - enemy_drifter
+  - particle
+  m_RenderDataMap: {}
+  m_Tag: NeonSwarm
+  m_IsVariant: 0

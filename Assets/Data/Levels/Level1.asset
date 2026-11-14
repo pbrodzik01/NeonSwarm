@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f8286222f8c8b247bd537c6f256ee16, type: 3}
+  m_Name: Level1
+  m_EditorClassIdentifier: 
+  levelIndex: 0
+  title: Poziom 1
+  subtitle: Pierwszy kontakt
+  difficultyLabel: "\u0142atwa"
+  accent: {r: 0.15, g: 0.91, b: 1, a: 1}
+  waves: 3
+  enemiesFirstWave: 3
+  enemiesPerWave: 1
+  spawnInterval: 1.2
+  wavePause: 2.5
+  maxAlive: 6
+  speedMultiplier: 1
+  fireRateMultiplier: 1
+  enemies:
+  - kind: 0
+    weight: 3
+    fromWave: 1
+  - kind: 1
+    weight: 1
+    fromWave: 2
+  obstacleCount: 2
+  pickupInterval: 10
+  coinDropChance: 0.65
+  parTimeSeconds: 75

@@ -1,0 +1,149 @@
+
+<section>
+<h1>4. Architektura</h1>
+<p>Projekt podzielono na logiczne moduły (osobne foldery i przestrzeń nazw <code>NeonSwarm</code>). Kod gry tworzy assembly <code>NeonSwarm.Runtime</code>, generator zawartości i budowanie APK – <code>NeonSwarm.Editor</code> (tylko edytor), a testy – <code>NeonSwarm.Tests.EditMode</code> i <code>NeonSwarm.Tests.PlayMode</code>. Moduły komunikują się przez statyczną szynę zdarzeń <code>GameEvents</code>, więc np. HUD, system misji i dynamiczna trudność nie znają klas gracza ani przeciwników, a tylko reagują na zdarzenia.</p>
+
+<h2>4.1 Sceny i przejścia</h2>
+<svg class="diagram" viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="12">
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0d8fa8"/></marker></defs>
+  <g fill="#e9f7fa" stroke="#0d8fa8" stroke-width="1.4">
+    <rect x="10" y="80" width="80" height="40" rx="8"/>
+    <rect x="130" y="80" width="100" height="40" rx="8"/>
+    <rect x="130" y="10" width="100" height="40" rx="8"/>
+    <rect x="280" y="80" width="80" height="40" rx="8"/>
+    <rect x="400" y="80" width="80" height="40" rx="8"/>
+    <rect x="520" y="80" width="80" height="40" rx="8"/>
+    <rect x="620" y="160" width="90" height="40" rx="8" fill="#fbe9f4" stroke="#b0207f"/>
+  </g>
+  <g text-anchor="middle" fill="#16192a" font-weight="600">
+    <text x="50" y="104">Boot</text><text x="180" y="104">MainMenu</text><text x="180" y="34">Settings</text>
+    <text x="320" y="104">Level1</text><text x="440" y="104">Level2</text><text x="560" y="104">Level3</text><text x="665" y="184">GameOver</text>
+  </g>
+  <g stroke="#0d8fa8" stroke-width="1.4" fill="none" marker-end="url(#a)">
+    <path d="M90,100 L128,100"/>
+    <path d="M170,80 L170,52"/><path d="M190,52 L190,78"/>
+    <path d="M230,100 L278,100"/><path d="M360,100 L398,100"/><path d="M480,100 L518,100"/>
+    <path d="M600,100 Q660,110 665,158"/>
+    <path d="M320,120 Q330,180 618,180"/><path d="M440,120 Q450,170 618,176"/>
+    <path d="M620,195 Q300,215 185,122"/>
+  </g>
+  <g font-size="10" fill="#5b6275">
+    <text x="196" y="68">Ustawienia / Powrót</text>
+    <text x="236" y="94">Graj (wybór poziomu)</text>
+    <text x="368" y="74">ukończenie</text><text x="488" y="74">ukończenie</text>
+    <text x="600" y="128">zwycięstwo</text>
+    <text x="360" y="168">HP = 0 (z każdego poziomu)</text>
+    <text x="330" y="206">Menu / Spróbuj ponownie (powrót do poziomu)</text>
+  </g>
+</svg>
+<p>Scena <b>Boot</b> wczytuje zapis, konfiguruje dźwięk i wyświetla pasek ładowania, a następnie przechodzi do <b>MainMenu</b>. Jeszcze przed załadowaniem pierwszej sceny (<code>RuntimeInitializeOnLoadMethod</code>) <code>SystemsBootstrap</code> tworzy trwały obiekt <i>Systems</i> (<code>DontDestroyOnLoad</code>) z menedżerem audio, ładowaniem scen z przejściem (fade), powiadomieniami i licznikiem FPS. Dzięki temu każdą scenę, również poziom, można uruchomić bezpośrednio w edytorze. Przejścia realizuje <code>SceneLoader</code> (asynchroniczne <code>LoadSceneAsync</code> + przyciemnienie ekranu).</p>
+
+<h2>4.2 Główne komponenty systemu</h2>
+<svg class="diagram" viewBox="0 0 720 470" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="11">
+  <defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5b6275"/></marker></defs>
+  <rect x="5" y="5" width="710" height="95" rx="10" fill="#f3f5f9" stroke="#c9cede"/>
+  <text x="15" y="22" font-weight="700" fill="#0d8fa8">SYSTEMY TRWAŁE (Systems prefab, DontDestroyOnLoad) i usługi statyczne</text>
+  <g fill="#fff" stroke="#0d8fa8"><rect x="15" y="32" width="130" height="58" rx="6"/><rect x="155" y="32" width="100" height="58" rx="6"/><rect x="265" y="32" width="90" height="58" rx="6"/></g>
+  <g fill="#fff" stroke="#b0207f"><rect x="365" y="32" width="110" height="58" rx="6"/><rect x="485" y="32" width="110" height="58" rx="6"/><rect x="605" y="32" width="100" height="58" rx="6"/></g>
+  <g text-anchor="middle"><text x="80" y="52" font-weight="700">AudioManager</text><text x="80" y="67">AudioMixer (3 grupy)</text><text x="80" y="81">AudioLibrary, pula źródeł</text>
+  <text x="205" y="52" font-weight="700">SceneLoader</text><text x="205" y="67">async + fade</text><text x="205" y="81">Toast, FpsCounter</text>
+  <text x="310" y="52" font-weight="700">AppSettings</text><text x="310" y="67">FPS, wibracje</text><text x="310" y="81">głośność</text>
+  <text x="420" y="52" font-weight="700">SaveSystem</text><text x="420" y="67">SaveData → JSON</text><text x="420" y="81">+ kopia .bak</text>
+  <text x="540" y="52" font-weight="700">ProgressTracker</text><text x="540" y="67">misje, osiągnięcia</text><text x="540" y="81">ranking, sklep</text>
+  <text x="655" y="52" font-weight="700">GameEvents</text><text x="655" y="67">szyna zdarzeń</text><text x="655" y="81">GameSession</text></g>
+
+  <rect x="5" y="112" width="710" height="160" rx="10" fill="#f3f5f9" stroke="#c9cede"/>
+  <text x="15" y="129" font-weight="700" fill="#0d8fa8">SCENA POZIOMU (Level1–3)</text>
+  <rect x="285" y="138" width="150" height="50" rx="6" fill="#0d8fa8"/>
+  <text x="360" y="159" text-anchor="middle" fill="#fff" font-weight="700">GameManager</text>
+  <text x="360" y="175" text-anchor="middle" fill="#e9f7fa" font-size="10">maszyna stanów poziomu</text>
+  <g fill="#fff" stroke="#0d8fa8">
+    <rect x="15" y="200" width="125" height="62" rx="6"/><rect x="150" y="200" width="125" height="62" rx="6"/><rect x="285" y="200" width="120" height="62" rx="6"/>
+    <rect x="415" y="200" width="95" height="62" rx="6"/><rect x="520" y="200" width="90" height="62" rx="6"/><rect x="620" y="200" width="85" height="62" rx="6"/>
+    <rect x="15" y="138" width="125" height="50" rx="6"/><rect x="560" y="138" width="145" height="50" rx="6"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="77" y="220" font-weight="700">WaveSpawner</text><text x="77" y="235">WavePlanner (losowanie</text><text x="77" y="249">ważone z ziarnem)</text>
+    <text x="212" y="220" font-weight="700">DifficultyDirector</text><text x="212" y="235">DifficultyModel</text><text x="212" y="249">TEMPO 0,8–1,4</text>
+    <text x="345" y="220" font-weight="700">ArenaGenerator</text><text x="345" y="235">ściany, granice,</text><text x="345" y="249">filary proceduralne</text>
+    <text x="462" y="220" font-weight="700">PickupSpawner</text><text x="462" y="235">drop monet,</text><text x="462" y="249">bonusy</text>
+    <text x="565" y="220" font-weight="700">ScoreManager</text><text x="565" y="235">punkty +</text><text x="565" y="249">napisy „+100”</text>
+    <text x="662" y="220" font-weight="700">CameraRig</text><text x="662" y="235">dopasowanie</text><text x="662" y="249">+ wstrząs</text>
+    <text x="77" y="158" font-weight="700">Hud</text><text x="77" y="174">VirtualJoystick, PULS</text>
+    <text x="632" y="158" font-weight="700">PauseMenu</text><text x="632" y="174">SettingsPanel, LevelComplete</text>
+  </g>
+  <g stroke="#5b6275" fill="none" marker-end="url(#b)">
+    <path d="M300,188 L90,198"/><path d="M330,188 L215,198"/><path d="M360,188 L345,198"/><path d="M390,188 L462,198"/><path d="M415,188 L565,198"/><path d="M285,163 L142,163"/><path d="M435,163 L558,163"/>
+  </g>
+
+  <rect x="5" y="284" width="710" height="180" rx="10" fill="#f3f5f9" stroke="#c9cede"/>
+  <text x="15" y="301" font-weight="700" fill="#0d8fa8">AKTORZY (prefaby) i INFRASTRUKTURA</text>
+  <g fill="#fff" stroke="#0d8fa8">
+    <rect x="15" y="312" width="165" height="100" rx="6"/><rect x="190" y="312" width="175" height="100" rx="6"/><rect x="375" y="312" width="150" height="100" rx="6"/><rect x="535" y="312" width="170" height="100" rx="6"/>
+  </g>
+  <g fill="#fff" stroke="#b0207f"><rect x="15" y="420" width="335" height="36" rx="6"/><rect x="360" y="420" width="345" height="36" rx="6"/></g>
+  <g text-anchor="middle">
+    <text x="97" y="330" font-weight="700">Player</text><text x="97" y="346">PlayerController (ruch)</text><text x="97" y="360">PlayerHealth (HP, tarcza)</text><text x="97" y="374">PlayerShooter (auto-ogień)</text><text x="97" y="388">PlayerPulse (fala)</text><text x="97" y="402">Animator, Rigidbody2D</text>
+    <text x="277" y="330" font-weight="700">EnemyBase (abstrakcyjna)</text><text x="277" y="346">DrifterEnemy – ruch poziomy</text><text x="277" y="360">ChaserEnemy – pościg, szarża</text><text x="277" y="374">ShooterEnemy – strzał z dystansu</text><text x="277" y="388">Think() co 0,2 s, Tick()</text><text x="277" y="402">EnemyRegistry</text>
+    <text x="450" y="330" font-weight="700">Projectile</text><text x="450" y="346">kinematyczny + trigger</text><text x="450" y="360">IDamageable</text><text x="450" y="374">warstwy kolizji:</text><text x="450" y="388">PlayerBullet / EnemyBullet</text>
+    <text x="620" y="330" font-weight="700">Pickup (abstrakcyjna)</text><text x="620" y="346">CoinPickup +10 pkt</text><text x="620" y="360">MedkitPickup +1 HP</text><text x="620" y="374">ShieldPickup 5 s</text><text x="620" y="388">RapidFirePickup 6 s</text><text x="620" y="402">magnes, miganie</text>
+    <text x="182" y="442">PoolManager / ObjectPool / Poolable – pule obiektów</text>
+    <text x="532" y="442">Fx + FxLibrary – eksplozje, iskry, portale, napisy (pule)</text>
+  </g>
+</svg>
+
+<h2>4.3 Struktura folderów</h2>
+<pre>Assets/
+├── Scenes/      Boot, MainMenu, Settings, Level1, Level2, Level3, GameOver
+├── Scripts/     (assembly NeonSwarm.Runtime)
+│   ├── Core/       GameEvents, GameSession, ObjectPool, PoolManager, SceneLoader, SystemsBootstrap, Boot
+│   ├── Player/     Player, PlayerController, PlayerHealth, PlayerShooter, PlayerPulse
+│   ├── Enemy/      EnemyBase, DrifterEnemy, ChaserEnemy, ShooterEnemy, EnemyRegistry
+│   ├── Combat/     Projectile
+│   ├── Items/      Pickup, CoinPickup, MedkitPickup, ShieldPickup, RapidFirePickup
+│   ├── Game/       GameManager, WaveSpawner, WavePlanner, DifficultyDirector, ArenaGenerator,
+│   │               PickupSpawner, ScoreManager, LevelConfig, CameraRig, Fx, PooledEffect, FloatingText
+│   ├── Progress/   ShopCatalog, ShopService, MissionService, AchievementService, ProgressTracker
+│   ├── UI/         Hud, VirtualJoystick, MainMenu, panele menu, PauseMenu, SettingsPanel, GameOverScreen, UiKit
+│   ├── Audio/      AudioManager, AudioLibrary
+│   └── Save/       SaveData, SaveSystem
+├── Editor/      ProjectBuilder, SpriteFactory, AudioFactory, MixerFactory, AnimationFactory,
+│                PrefabFactory, EffectFactory, LevelFactory, SceneFactory, AndroidBuilder
+├── Tests/       EditMode (11 testów logiki), PlayMode (5 testów przepływu gry)
+├── Prefabs/     Actors, Projectiles, Items, Effects, Environment
+├── Sprites/     Game, UI, Background, Icon  (+ Sprite Atlas)
+├── Animations/  Player, Enemy (klipy, AnimatorController, AnimatorOverrideController)
+├── Audio/       SFX (15), Music (2), MainMixer.mixer, AudioLibrary
+├── Materials/   ParticlesAdditive
+├── Data/Levels/ Level1–3 (ScriptableObject LevelConfig)
+└── Resources/   Systems.prefab, UiTheme, FxLibrary</pre>
+
+<h2>4.4 Fizyka i kolizje</h2>
+<p>Gracz i przeciwnicy mają dynamiczne <code>Rigidbody2D</code> (grawitacja 0, zablokowana rotacja) i <code>CircleCollider2D</code>. Pociski i przedmioty są ciałami kinematycznymi z colliderami ustawionymi jako <b>trigger</b>, ściany i filary to statyczne <code>BoxCollider2D</code>. O tym, co z czym koliduje, decyduje macierz warstw (<code>PhysicsSetup</code>):</p>
+<table>
+  <tr><th>Warstwa</th><th>Koliduje z</th><th>Obsługa</th></tr>
+  <tr><td>Player</td><td>Enemy, EnemyBullet, Pickup, Obstacle</td><td><code>OnCollisionStay2D</code> wroga → obrażenia; trigger przedmiotu → efekt</td></tr>
+  <tr><td>Enemy</td><td>Player, PlayerBullet, Obstacle, Enemy</td><td>wrogowie odpychają się nawzajem; Dryfer odbija się od ścian (<code>OnCollisionEnter2D</code>)</td></tr>
+  <tr><td>PlayerBullet / EnemyBullet</td><td>Enemy / Player oraz Obstacle</td><td><code>OnTriggerEnter2D</code> → <code>IDamageable.TakeDamage</code> albo zniszczenie na przeszkodzie</td></tr>
+  <tr><td>Pickup</td><td>Player</td><td><code>OnTriggerEnter2D</code> + <code>CompareTag("Player")</code></td></tr>
+</table>
+<p>Fala PULS korzysta z <code>Physics2D.OverlapCircleNonAlloc</code> z maską warstw Enemy i EnemyBullet, na stałym, wcześniej zaalokowanym buforze.</p>
+
+<h2>4.5 Animacje (Animator)</h2>
+<svg class="diagram" viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="12">
+  <defs><marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b0207f"/></marker></defs>
+  <g fill="#fbe9f4" stroke="#b0207f" stroke-width="1.4">
+    <rect x="20" y="20" width="90" height="36" rx="18"/><rect x="20" y="95" width="90" height="36" rx="18"/>
+    <rect x="240" y="57" width="110" height="36" rx="18" fill="#eee" stroke="#888"/>
+    <rect x="450" y="10" width="100" height="36" rx="18"/><rect x="450" y="57" width="100" height="36" rx="18"/><rect x="450" y="104" width="100" height="36" rx="18"/>
+  </g>
+  <g text-anchor="middle" font-weight="600"><text x="65" y="43">IDLE</text><text x="65" y="118">RUN</text><text x="295" y="80">Any State</text><text x="500" y="33">ATTACK</text><text x="500" y="80">HURT</text><text x="500" y="127">DEAD</text></g>
+  <g stroke="#b0207f" stroke-width="1.3" fill="none" marker-end="url(#c)">
+    <path d="M55,56 L55,93"/><path d="M75,95 L75,58"/>
+    <path d="M350,68 L448,30"/><path d="M350,75 L448,75"/><path d="M350,82 L448,118"/>
+    <path d="M450,24 Q300,0 112,32"/><path d="M450,70 Q300,45 112,42"/>
+  </g>
+  <g font-size="10" fill="#5b6275"><text x="80" y="80">Speed &gt; 0,1 / &lt; 0,1</text><text x="370" y="40">Attack (trigger)</text><text x="370" y="70">Hurt (trigger)</text><text x="370" y="110">Dead = true</text><text x="250" y="16">po zakończeniu klipu (exit time)</text></g>
+</svg>
+<p>Gracz i przeciwnicy mają po 5 stanów: <b>Idle, Run, Attack, Hurt, Dead</b>. Przejścia z <i>Any State</i> do Attack i Hurt mają warunek <code>Dead == false</code>, więc martwy obiekt nie wraca do innych animacji. Klipy animują m.in. podmianę klatek płomienia silnika (krzywe <i>sprite</i>), skalę (odrzut przy strzale, „puchnięcie” przy trafieniu, zanikanie przy śmierci) oraz kanał alfa nakładki błysku. Łowca i Strzelec używają <code>AnimatorOverrideController</code>, który podmienia klip ataku na szarżę i ładowanie strzału, przy wspólnym kontrolerze bazowym.</p>
+</section>

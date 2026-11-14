@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Neon Swarm – dokumentacja projektu</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+  :root { --ink:#16192a; --muted:#5b6275; --accent:#0d8fa8; --accent2:#b0207f; --line:#d9dce5; --soft:#f3f5f9; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", "Calibri", Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 20pt; color: var(--accent); margin: 0 0 10pt; border-bottom: 2px solid var(--accent); padding-bottom: 4pt; }
+  h2 { font-size: 13.5pt; color: var(--ink); margin: 16pt 0 6pt; }
+  h3 { font-size: 11.5pt; color: var(--accent2); margin: 12pt 0 4pt; }
+  p { margin: 0 0 7pt; text-align: justify; }
+  ul, ol { margin: 0 0 8pt 18pt; padding: 0; }
+  li { margin-bottom: 3pt; }
+  section { page-break-before: always; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; font-size: 9.5pt; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+  th { background: var(--accent); color: #fff; text-align: left; padding: 4pt 6pt; font-weight: 600; }
+  td { border-bottom: 1px solid var(--line); padding: 4pt 6pt; vertical-align: top; }
+  tr:nth-child(even) td { background: var(--soft); }
+  code, pre { font-family: Consolas, "Cascadia Mono", monospace; font-size: 8.6pt; }
+  pre { background: #0f1322; color: #d7e3ff; padding: 8pt 10pt; border-radius: 6pt; white-space: pre-wrap; page-break-inside: avoid; margin: 4pt 0 10pt; }
+  .note { background: var(--soft); border-left: 3px solid var(--accent); padding: 6pt 10pt; margin: 8pt 0; }
+  .ok { color: #1a8a3a; font-weight: 600; }
+  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin: 8pt 0; }
+  .shots.two { grid-template-columns: repeat(2, 1fr); }
+  figure { margin: 0; page-break-inside: avoid; text-align: center; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 6pt; }
+  figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 3pt; }
+  .title-page { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .title-top { text-align: center; color: var(--muted); font-size: 11pt; letter-spacing: .5pt; }
+  .title-main { text-align: center; }
+  .title-main .logo { width: 150pt; height: 150pt; border-radius: 24pt; }
+  .title-main h1 { border: 0; font-size: 34pt; margin: 14pt 0 4pt; color: #0b1020; letter-spacing: 2pt; }
+  .title-main .subtitle { font-size: 13pt; color: var(--muted); }
+  .meta { width: 75%; margin: 0 auto; font-size: 11pt; }
+  .meta td { border: 0; padding: 4pt 6pt; background: none !important; }
+  .meta td:first-child { color: var(--muted); width: 38%; }
+  .toc li { margin-bottom: 4pt; }
+  .diagram { width: 100%; margin: 6pt 0 10pt; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt; }
+</style>
+</head>
+<body>
+
+<div class="title-page">
+  <div class="title-top">PROJEKT ZALICZENIOWY · WARIANT INDYWIDUALNY</div>
+  <div class="title-main">
+    <img class="logo" src="../Assets/Sprites/Icon/AppIcon.png" alt="Ikona gry">
+    <h1>NEON SWARM</h1>
+    <div class="subtitle">Mobilna gra zręcznościowa 2D na system Android wykonana w silniku Unity</div>
+  </div>
+  <table class="meta">
+    <tr><td>Imię i nazwisko</td><td><b>Patrycja Brodzik</b></td></tr>
+    <tr><td>Numer albumu</td><td><b>50708</b></td></tr>
+    <tr><td>Kierunek</td><td><b>Informatyka</b></td></tr>
+    <tr><td>Przedmiot</td><td>Programowanie gier mobilnych</td></tr>
+    <tr><td>Temat projektu</td><td>Zaprojektowanie i wykonanie kompletnej gry mobilnej 2D „Neon Swarm” w silniku Unity</td></tr>
+    <tr><td>Rok akademicki</td><td>2026/2027</td></tr>
+    <tr><td>Silnik / język</td><td>Unity 2022.3.62f3 LTS / C#</td></tr>
+  </table>
+</div>
+
+<section>
+<h1>Spis treści</h1>
+<ol class="toc">
+  <li>Opis projektu</li>
+  <li>Założenia projektu</li>
+  <li>Mechanika gry</li>
+  <li>Architektura</li>
+  <li>Projekt interfejsu użytkownika</li>
+  <li>Implementacja – najważniejsze klasy C#</li>
+  <li>Testowanie</li>
+  <li>Optymalizacja</li>
+  <li>Podsumowanie</li>
+</ol>
+
+<h1 style="margin-top:22pt">1. Opis projektu</h1>
+<table>
+  <tr><th style="width:30%">Pozycja</th><th>Opis</th></tr>
+  <tr><td>Nazwa gry</td><td><b>Neon Swarm</b></td></tr>
+  <tr><td>Gatunek</td><td>gra zręcznościowa (arcade), top-down arena shooter 2D z elementami progresji (sklep, misje, osiągnięcia)</td></tr>
+  <tr><td>Platforma</td><td>Android 7.0 (API 24) i nowsze, architektury ARM64 i x86_64, orientacja pionowa (portrait)</td></tr>
+  <tr><td>Grupa docelowa</td><td>gracze mobilni od 10. roku życia, lubiący krótkie, dynamiczne sesje (3–6 minut na poziom), np. w komunikacji miejskiej. Gra nie zawiera przemocy wobec ludzi: przeciwnikami są abstrakcyjne, neonowe drony.</td></tr>
+  <tr><td>Tryb</td><td>jednoosobowy, offline. Wszystkie dane zapisują się lokalnie na urządzeniu.</td></tr>
+  <tr><td>Wersja</td><td>1.0.0 (versionCode 1), pakiet <code>com.neonswarm.game</code></td></tr>
+</table>
+<p>Gracz kieruje neonowym statkiem zamkniętym na arenie, którą atakują kolejne fale roju dronów. Statek sam celuje i strzela w najbliższego przeciwnika, więc zadaniem gracza jest manewrowanie: unikanie kontaktu z wrogami i ich pocisków, zbieranie bonusów oraz trafne użycie fali uderzeniowej (PULS). Gra ma trzy poziomy o rosnącej trudności, a ukończenie trzeciego oznacza zwycięstwo.</p>
+<p>Oprócz wymagań podstawowych zrealizowano zakres rozszerzony: ranking, osiągnięcia, sklep, walutę, dynamiczną trudność, lokalną tabelę wyników, proceduralne generowanie poziomu, object pooling oraz system misji. Projekt ma też komplet scen z wariantu rozszerzonego (Boot, MainMenu, Level1–3, Settings, GameOver), trzy typy przeciwników i cztery rodzaje przedmiotów.</p>
+
+<h1 style="margin-top:22pt">2. Założenia projektu</h1>
+<h3>Problem</h3>
+<p>Gry akcji na telefony często przenoszą schemat sterowania z konsol (dwa joysticki, wiele przycisków), który na małym ekranie dotykowym bywa nieprecyzyjny i męczący. Kciuki zasłaniają obraz, a gracz musi jednocześnie celować i się poruszać. Krótkie sesje mobilne wymagają też, żeby rozgrywka zaczynała się natychmiast i dawała szybkie poczucie postępu.</p>
+<h3>Cel gry</h3>
+<ul>
+  <li>Zaprojektować rozgrywkę na jeden kciuk: ruch pływającym joystickiem i automatyczny ogień, a jedyną decyzją taktyczną poza ruchem jest moment użycia PULSU.</li>
+  <li>Dać jasno określony cel: <b>przetrwać wszystkie fale na trzech poziomach</b>. Przegrana następuje po utracie wszystkich punktów życia.</li>
+  <li>Utrzymać zaangażowanie przez progresję: punkty, monety, sklep z ulepszeniami, misje, osiągnięcia i lokalny ranking.</li>
+  <li>Zapewnić płynne działanie (docelowo 60 FPS) dzięki optymalizacjom: puli obiektów, atlasowi sprite’ów, kompresji ASTC i ograniczeniu pracy w <code>Update()</code>.</li>
+  <li>Wykorzystać praktycznie: sceny Unity, fizykę 2D, Animator, AudioMixer, UI z obsługą różnych rozdzielczości i safe area, zapis w JSON oraz testy jednostkowe.</li>
+</ul>
+<h3>Ograniczenia i decyzje</h3>
+<ul>
+  <li>Orientacja pionowa: gra jest zaprojektowana do trzymania telefonu jedną ręką.</li>
+  <li>Grafika, dźwięki i muzyka są generowane proceduralnie przez skrypt edytora (<code>ProjectBuilder</code>), dzięki czemu projekt nie korzysta z zasobów o niejasnej licencji, a całą zawartość można odtworzyć jednym poleceniem.</li>
+  <li>Brak połączeń sieciowych: ranking i zapis są lokalne, co upraszcza wymagania dotyczące prywatności.</li>
+</ul>
+</section>
+
+<section>
+<h1>3. Mechanika gry</h1>
+<h2>3.1 Ruch i sterowanie</h2>
+<p>Wybrano <b>wariant B – wirtualny joystick</b>, uzupełniony przyciskiem akcji. Joystick jest „pływający”: pojawia się w miejscu, w którym gracz dotknie lewej dolnej części ekranu (ok. 60% szerokości × 40% wysokości strefy bezpiecznej). Wychylenie gałki (z martwą strefą 12%) ustala kierunek i prędkość statku (maks. 5,6 j/s). Ruch realizuje <code>Rigidbody2D</code> z płynnym przyspieszaniem (<code>Vector2.MoveTowards</code> na prędkości), więc statek ma lekką bezwładność.</p>
+<p><b>Uzasadnienie wyboru:</b> joystick daje ciągły ruch w 360°, niezbędny do unikania pocisków na arenie. Przyciski kierunkowe (wariant A) ograniczają ruch do 8 kierunków, gesty (wariant C) są dyskretne i nie nadają się do ciągłego manewrowania, a akcelerometr (wariant D) jest mniej precyzyjny, męczy przy dłuższej grze i nie działa wygodnie, gdy gracz leży lub siedzi w pojeździe. Pływający joystick nie wymaga patrzenia na kontroler, bo kciuk zawsze trafia w jego środek. Automatyczne celowanie zwalnia drugi kciuk, którym gracz tylko od czasu do czasu naciska duży przycisk PULS (240 px przy 1080×1920).</p>
+<table>
+  <tr><th>Sterowanie</th><th>Działanie</th></tr>
+  <tr><td>Dotyk + przeciągnięcie (lewy dół)</td><td>ruch statku</td></tr>
+  <tr><td>Automatycznie</td><td>obrót i ogień w kierunku najbliższego wroga w zasięgu 9 j., do którego jest czysta linia strzału (co 0,3 s)</td></tr>
+  <tr><td>Przycisk PULS (prawy dół)</td><td>fala uderzeniowa o promieniu 2,8 j.: 2 obrażenia, odrzut, kasuje wrogie pociski; odnowienie 8 s</td></tr>
+  <tr><td>Przycisk pauzy / „Wstecz” Androida</td><td>pauza; w menu „Wstecz” zamyka otwarty panel</td></tr>
+</table>
+
+<h2>3.2 Walka</h2>
+<p>Pociski gracza (<code>Projectile</code>, kinematyczne ciało z triggerem) zadają 1 obrażenie i lekko odrzucają wroga. Przeciwnicy ranią gracza kontaktem (<code>OnCollisionStay2D</code>), a Strzelec także pociskami. Po trafieniu gracz ma 1,2 s nietykalności (miganie sprite’a), dostaje odrzut, ekran się trzęsie i telefon wibruje (opcjonalnie). Przedmiot „Turbo” podwaja szybkostrzelność, a „Tarcza” całkowicie blokuje obrażenia.</p>
+
+<h2>3.3 Przeciwnicy</h2>
+<table>
+  <tr><th>Typ</th><th>Wygląd</th><th>Zachowanie</th><th>HP</th><th>Punkty</th></tr>
+  <tr><td><b>Dryfer</b> (Enemy 1)</td><td>różowy romb</td><td>porusza się poziomo z falowaniem w pionie i powoli dryfuje w stronę wysokości gracza; odbija się od ścian i przeszkód</td><td>1</td><td>100</td></tr>
+  <tr><td><b>Łowca</b> (Enemy 2)</td><td>pomarańczowa gwiazda</td><td>śledzi gracza, omijając filary (CircleCast); w odległości &lt; 2,8 j. wykonuje szarżę (2,6× prędkość przez 0,35 s, odnowienie 2,2 s)</td><td>2</td><td>150</td></tr>
+  <tr><td><b>Strzelec</b> (Enemy 3)</td><td>zielony sześciokąt z lufą</td><td>atakuje z dystansu: utrzymuje odległość ~4,6 j. i linię strzału, krąży wokół gracza, co 2,4 s ładuje strzał (0,4 s sygnalizacji) i strzela pociskiem</td><td>3</td><td>200</td></tr>
+</table>
+<p>AI każdego wroga podejmuje decyzje co 0,2 s (metoda <code>Think()</code>), a w każdej klatce wykonuje tylko tanie operacje (<code>Tick()</code>). Każdy wróg pojawia się po 0,6 s sygnalizacji: na krawędzi areny wiruje portal, a punkt spawnu jest wybierany możliwie daleko od gracza (co najmniej 3,8 j.).</p>
+
+<h2>3.4 Przedmioty (obiekty interaktywne)</h2>
+<table>
+  <tr><th>Przedmiot</th><th>Efekt</th><th>Źródło</th></tr>
+  <tr><td>Moneta</td><td>+10 pkt, +1 moneta do sklepu; przyciągana magnesem</td><td>wypada z wrogów (50–65%), grupy po 4</td></tr>
+  <tr><td>Apteczka</td><td>+1 HP (przy pełnym zdrowiu +25 pkt)</td><td>losowo co ~10–12 s; częściej przy 1 HP</td></tr>
+  <tr><td>Tarcza (power-up)</td><td>5 s nieśmiertelności (bańka wokół statku)</td><td>losowo</td></tr>
+  <tr><td>Turbo (power-up)</td><td>6 s podwójnej szybkostrzelności</td><td>losowo</td></tr>
+</table>
+<p>Przedmioty znikają po 9–10 s, a przez ostatnie 2,5 s migają.</p>
+
+<h2>3.5 Punktacja</h2>
+<table>
+  <tr><th>Akcja</th><th>Punkty</th></tr>
+  <tr><td>Pokonanie Dryfera / Łowcy / Strzelca</td><td>+100 / +150 / +200</td></tr>
+  <tr><td>Zebranie monety</td><td>+10</td></tr>
+  <tr><td>Zebranie power-upu (tarcza, turbo)</td><td>+20</td></tr>
+  <tr><td>Ukończenie poziomu</td><td>+500</td></tr>
+  <tr><td>Bonus czasowy</td><td>+50 za każde rozpoczęte 10 s poniżej czasu „par” poziomu (75 / 110 / 150 s)</td></tr>
+  <tr><td>Poziom ukończony bez obrażeń</td><td>+250</td></tr>
+</table>
+<p>Wynik przechodzi między poziomami jednej rozgrywki. Restart poziomu przywraca wynik z chwili jego rozpoczęcia.</p>
+
+<h2>3.6 Poziomy</h2>
+<table>
+  <tr><th>Poziom</th><th>Liczba wrogów w 1. fali</th><th>Fale (wrogów)</th><th>Prędkość</th><th>Typy wrogów</th><th>Przeszkody</th><th>Trudność</th></tr>
+  <tr><td>1 – Pierwszy kontakt</td><td>3</td><td>3 (3/4/5)</td><td>1,0</td><td>Dryfer, od 2. fali Łowca</td><td>2</td><td>łatwa</td></tr>
+  <tr><td>2 – Gniazdo łowców</td><td>6</td><td>3 (6/7/8)</td><td>1,3</td><td>Dryfer, Łowca, od 2. fali Strzelec</td><td>3</td><td>średnia</td></tr>
+  <tr><td>3 – Serce roju</td><td>10</td><td>3 (10/12/14)</td><td>1,6</td><td>wszystkie, szybszy ogień ×1,3</td><td>4</td><td>trudna</td></tr>
+</table>
+<p>Kolejny poziom odblokowuje się po ukończeniu poprzedniego, a informacja o odblokowaniu zapisuje się w pliku. Między poziomami gracz widzi podsumowanie z przyciskiem „Następny poziom”. Liczby wrogów w falach są wartościami bazowymi, które dodatkowo koryguje dynamiczna trudność (rozdz. 3.8).</p>
+
+<h2>3.7 Zwycięstwo i przegrana</h2>
+<ul>
+  <li><b>Zwycięstwo na poziomie:</b> pokonanie wszystkich wrogów ze wszystkich fal. Po poziomie 3 wyświetla się ekran „ZWYCIĘSTWO!” (scena GameOver w trybie wygranej).</li>
+  <li><b>Przegrana:</b> HP spada do 0, odtwarza się animacja śmierci (Animator: stan <i>Dead</i>), eksplozja i dźwięk, a po 1,6 s pojawia się ekran „KONIEC GRY” z wynikiem, rekordem, miejscem w rankingu i przyciskami „Spróbuj ponownie” oraz „Menu główne”.</li>
+  <li><b>Życie:</b> 3 HP (+1 za każdy poziom ulepszenia „Pancerz”, maks. 5).</li>
+</ul>
+
+<h2>3.8 Elementy rozszerzone</h2>
+<ul>
+  <li><b>Dynamiczna trudność</b>: co 4 s <code>DifficultyDirector</code> ocenia zdrowie gracza, liczbę pokonanych wrogów na minutę i czas od ostatniego trafienia, po czym przesuwa wskaźnik TEMPO w zakresie 0,8–1,4. TEMPO zmienia prędkość wrogów, odstęp między spawnami, szybkostrzelność Strzelców i liczebność kolejnych fal.</li>
+  <li><b>Proceduralne generowanie</b>: przy każdym starcie poziomu przeszkody (filary) losują się z ziarnem (rejection sampling z minimalnym odstępem i strefą bezpieczną wokół gracza), a skład każdej fali losuje się z wagami typów wrogów.</li>
+  <li><b>Sklep i waluta</b>: monety można wydać na skórki (4), broń (podwójne działo), ulepszenia (pancerz, szybkostrzelność, generator pulsu, magnes) oraz power-up „tarcza startowa”.</li>
+  <li><b>Misje</b>: zawsze 3 aktywne, np. „MISJA: Pokonaj 20 przeciwników – POSTĘP 13 / 20”, z nagrodą w monetach. Ukończona misja jest od razu zastępowana kolejną.</li>
+  <li><b>Osiągnięcia</b> (7) i <b>ranking</b> 10 najlepszych wyników z nazwą gracza, poziomem i datą.</li>
+</ul>
+</section>
+
+
+<section>
+<h1>4. Architektura</h1>
+<p>Projekt podzielono na logiczne moduły (osobne foldery i przestrzeń nazw <code>NeonSwarm</code>). Kod gry tworzy assembly <code>NeonSwarm.Runtime</code>, generator zawartości i budowanie APK – <code>NeonSwarm.Editor</code> (tylko edytor), a testy – <code>NeonSwarm.Tests.EditMode</code> i <code>NeonSwarm.Tests.PlayMode</code>. Moduły komunikują się przez statyczną szynę zdarzeń <code>GameEvents</code>, więc np. HUD, system misji i dynamiczna trudność nie znają klas gracza ani przeciwników, a tylko reagują na zdarzenia.</p>
+
+<h2>4.1 Sceny i przejścia</h2>
+<svg class="diagram" viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="12">
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0d8fa8"/></marker></defs>
+  <g fill="#e9f7fa" stroke="#0d8fa8" stroke-width="1.4">
+    <rect x="10" y="80" width="80" height="40" rx="8"/>
+    <rect x="130" y="80" width="100" height="40" rx="8"/>
+    <rect x="130" y="10" width="100" height="40" rx="8"/>
+    <rect x="280" y="80" width="80" height="40" rx="8"/>
+    <rect x="400" y="80" width="80" height="40" rx="8"/>
+    <rect x="520" y="80" width="80" height="40" rx="8"/>
+    <rect x="620" y="160" width="90" height="40" rx="8" fill="#fbe9f4" stroke="#b0207f"/>
+  </g>
+  <g text-anchor="middle" fill="#16192a" font-weight="600">
+    <text x="50" y="104">Boot</text><text x="180" y="104">MainMenu</text><text x="180" y="34">Settings</text>
+    <text x="320" y="104">Level1</text><text x="440" y="104">Level2</text><text x="560" y="104">Level3</text><text x="665" y="184">GameOver</text>
+  </g>
+  <g stroke="#0d8fa8" stroke-width="1.4" fill="none" marker-end="url(#a)">
+    <path d="M90,100 L128,100"/>
+    <path d="M170,80 L170,52"/><path d="M190,52 L190,78"/>
+    <path d="M230,100 L278,100"/><path d="M360,100 L398,100"/><path d="M480,100 L518,100"/>
+    <path d="M600,100 Q660,110 665,158"/>
+    <path d="M320,120 Q330,180 618,180"/><path d="M440,120 Q450,170 618,176"/>
+    <path d="M620,195 Q300,215 185,122"/>
+  </g>
+  <g font-size="10" fill="#5b6275">
+    <text x="196" y="68">Ustawienia / Powrót</text>
+    <text x="236" y="94">Graj (wybór poziomu)</text>
+    <text x="368" y="74">ukończenie</text><text x="488" y="74">ukończenie</text>
+    <text x="600" y="128">zwycięstwo</text>
+    <text x="360" y="168">HP = 0 (z każdego poziomu)</text>
+    <text x="330" y="206">Menu / Spróbuj ponownie (powrót do poziomu)</text>
+  </g>
+</svg>
+<p>Scena <b>Boot</b> wczytuje zapis, konfiguruje dźwięk i wyświetla pasek ładowania, a następnie przechodzi do <b>MainMenu</b>. Jeszcze przed załadowaniem pierwszej sceny (<code>RuntimeInitializeOnLoadMethod</code>) <code>SystemsBootstrap</code> tworzy trwały obiekt <i>Systems</i> (<code>DontDestroyOnLoad</code>) z menedżerem audio, ładowaniem scen z przejściem (fade), powiadomieniami i licznikiem FPS. Dzięki temu każdą scenę, również poziom, można uruchomić bezpośrednio w edytorze. Przejścia realizuje <code>SceneLoader</code> (asynchroniczne <code>LoadSceneAsync</code> + przyciemnienie ekranu).</p>
+
+<h2>4.2 Główne komponenty systemu</h2>
+<svg class="diagram" viewBox="0 0 720 470" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="11">
+  <defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5b6275"/></marker></defs>
+  <rect x="5" y="5" width="710" height="95" rx="10" fill="#f3f5f9" stroke="#c9cede"/>
+  <text x="15" y="22" font-weight="700" fill="#0d8fa8">SYSTEMY TRWAŁE (Systems prefab, DontDestroyOnLoad) i usługi statyczne</text>
+  <g fill="#fff" stroke="#0d8fa8"><rect x="15" y="32" width="130" height="58" rx="6"/><rect x="155" y="32" width="100" height="58" rx="6"/><rect x="265" y="32" width="90" height="58" rx="6"/></g>
+  <g fill="#fff" stroke="#b0207f"><rect x="365" y="32" width="110" height="58" rx="6"/><rect x="485" y="32" width="110" height="58" rx="6"/><rect x="605" y="32" width="100" height="58" rx="6"/></g>
+  <g text-anchor="middle"><text x="80" y="52" font-weight="700">AudioManager</text><text x="80" y="67">AudioMixer (3 grupy)</text><text x="80" y="81">AudioLibrary, pula źródeł</text>
+  <text x="205" y="52" font-weight="700">SceneLoader</text><text x="205" y="67">async + fade</text><text x="205" y="81">Toast, FpsCounter</text>
+  <text x="310" y="52" font-weight="700">AppSettings</text><text x="310" y="67">FPS, wibracje</text><text x="310" y="81">głośność</text>
+  <text x="420" y="52" font-weight="700">SaveSystem</text><text x="420" y="67">SaveData → JSON</text><text x="420" y="81">+ kopia .bak</text>
+  <text x="540" y="52" font-weight="700">ProgressTracker</text><text x="540" y="67">misje, osiągnięcia</text><text x="540" y="81">ranking, sklep</text>
+  <text x="655" y="52" font-weight="700">GameEvents</text><text x="655" y="67">szyna zdarzeń</text><text x="655" y="81">GameSession</text></g>
+
+  <rect x="5" y="112" width="710" height="160" rx="10" fill="#f3f5f9" stroke="#c9cede"/>
+  <text x="15" y="129" font-weight="700" fill="#0d8fa8">SCENA POZIOMU (Level1–3)</text>
+  <rect x="285" y="138" width="150" height="50" rx="6" fill="#0d8fa8"/>
+  <text x="360" y="159" text-anchor="middle" fill="#fff" font-weight="700">GameManager</text>
+  <text x="360" y="175" text-anchor="middle" fill="#e9f7fa" font-size="10">maszyna stanów poziomu</text>
+  <g fill="#fff" stroke="#0d8fa8">
+    <rect x="15" y="200" width="125" height="62" rx="6"/><rect x="150" y="200" width="125" height="62" rx="6"/><rect x="285" y="200" width="120" height="62" rx="6"/>
+    <rect x="415" y="200" width="95" height="62" rx="6"/><rect x="520" y="200" width="90" height="62" rx="6"/><rect x="620" y="200" width="85" height="62" rx="6"/>
+    <rect x="15" y="138" width="125" height="50" rx="6"/><rect x="560" y="138" width="145" height="50" rx="6"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="77" y="220" font-weight="700">WaveSpawner</text><text x="77" y="235">WavePlanner (losowanie</text><text x="77" y="249">ważone z ziarnem)</text>
+    <text x="212" y="220" font-weight="700">DifficultyDirector</text><text x="212" y="235">DifficultyModel</text><text x="212" y="249">TEMPO 0,8–1,4</text>
+    <text x="345" y="220" font-weight="700">ArenaGenerator</text><text x="345" y="235">ściany, granice,</text><text x="345" y="249">filary proceduralne</text>
+    <text x="462" y="220" font-weight="700">PickupSpawner</text><text x="462" y="235">drop monet,</text><text x="462" y="249">bonusy</text>
+    <text x="565" y="220" font-weight="700">ScoreManager</text><text x="565" y="235">punkty +</text><text x="565" y="249">napisy „+100”</text>
+    <text x="662" y="220" font-weight="700">CameraRig</text><text x="662" y="235">dopasowanie</text><text x="662" y="249">+ wstrząs</text>
+    <text x="77" y="158" font-weight="700">Hud</text><text x="77" y="174">VirtualJoystick, PULS</text>
+    <text x="632" y="158" font-weight="700">PauseMenu</text><text x="632" y="174">SettingsPanel, LevelComplete</text>
+  </g>
+  <g stroke="#5b6275" fill="none" marker-end="url(#b)">
+    <path d="M300,188 L90,198"/><path d="M330,188 L215,198"/><path d="M360,188 L345,198"/><path d="M390,188 L462,198"/><path d="M415,188 L565,198"/><path d="M285,163 L142,163"/><path d="M435,163 L558,163"/>
+  </g>
+
+  <rect x="5" y="284" width="710" height="180" rx="10" fill="#f3f5f9" stroke="#c9cede"/>
+  <text x="15" y="301" font-weight="700" fill="#0d8fa8">AKTORZY (prefaby) i INFRASTRUKTURA</text>
+  <g fill="#fff" stroke="#0d8fa8">
+    <rect x="15" y="312" width="165" height="100" rx="6"/><rect x="190" y="312" width="175" height="100" rx="6"/><rect x="375" y="312" width="150" height="100" rx="6"/><rect x="535" y="312" width="170" height="100" rx="6"/>
+  </g>
+  <g fill="#fff" stroke="#b0207f"><rect x="15" y="420" width="335" height="36" rx="6"/><rect x="360" y="420" width="345" height="36" rx="6"/></g>
+  <g text-anchor="middle">
+    <text x="97" y="330" font-weight="700">Player</text><text x="97" y="346">PlayerController (ruch)</text><text x="97" y="360">PlayerHealth (HP, tarcza)</text><text x="97" y="374">PlayerShooter (auto-ogień)</text><text x="97" y="388">PlayerPulse (fala)</text><text x="97" y="402">Animator, Rigidbody2D</text>
+    <text x="277" y="330" font-weight="700">EnemyBase (abstrakcyjna)</text><text x="277" y="346">DrifterEnemy – ruch poziomy</text><text x="277" y="360">ChaserEnemy – pościg, szarża</text><text x="277" y="374">ShooterEnemy – strzał z dystansu</text><text x="277" y="388">Think() co 0,2 s, Tick()</text><text x="277" y="402">EnemyRegistry</text>
+    <text x="450" y="330" font-weight="700">Projectile</text><text x="450" y="346">kinematyczny + trigger</text><text x="450" y="360">IDamageable</text><text x="450" y="374">warstwy kolizji:</text><text x="450" y="388">PlayerBullet / EnemyBullet</text>
+    <text x="620" y="330" font-weight="700">Pickup (abstrakcyjna)</text><text x="620" y="346">CoinPickup +10 pkt</text><text x="620" y="360">MedkitPickup +1 HP</text><text x="620" y="374">ShieldPickup 5 s</text><text x="620" y="388">RapidFirePickup 6 s</text><text x="620" y="402">magnes, miganie</text>
+    <text x="182" y="442">PoolManager / ObjectPool / Poolable – pule obiektów</text>
+    <text x="532" y="442">Fx + FxLibrary – eksplozje, iskry, portale, napisy (pule)</text>
+  </g>
+</svg>
+
+<h2>4.3 Struktura folderów</h2>
+<pre>Assets/
+├── Scenes/      Boot, MainMenu, Settings, Level1, Level2, Level3, GameOver
+├── Scripts/     (assembly NeonSwarm.Runtime)
+│   ├── Core/       GameEvents, GameSession, ObjectPool, PoolManager, SceneLoader, SystemsBootstrap, Boot
+│   ├── Player/     Player, PlayerController, PlayerHealth, PlayerShooter, PlayerPulse
+│   ├── Enemy/      EnemyBase, DrifterEnemy, ChaserEnemy, ShooterEnemy, EnemyRegistry
+│   ├── Combat/     Projectile
+│   ├── Items/      Pickup, CoinPickup, MedkitPickup, ShieldPickup, RapidFirePickup
+│   ├── Game/       GameManager, WaveSpawner, WavePlanner, DifficultyDirector, ArenaGenerator,
+│   │               PickupSpawner, ScoreManager, LevelConfig, CameraRig, Fx, PooledEffect, FloatingText
+│   ├── Progress/   ShopCatalog, ShopService, MissionService, AchievementService, ProgressTracker
+│   ├── UI/         Hud, VirtualJoystick, MainMenu, panele menu, PauseMenu, SettingsPanel, GameOverScreen, UiKit
+│   ├── Audio/      AudioManager, AudioLibrary
+│   └── Save/       SaveData, SaveSystem
+├── Editor/      ProjectBuilder, SpriteFactory, AudioFactory, MixerFactory, AnimationFactory,
+│                PrefabFactory, EffectFactory, LevelFactory, SceneFactory, AndroidBuilder
+├── Tests/       EditMode (11 testów logiki), PlayMode (5 testów przepływu gry)
+├── Prefabs/     Actors, Projectiles, Items, Effects, Environment
+├── Sprites/     Game, UI, Background, Icon  (+ Sprite Atlas)
+├── Animations/  Player, Enemy (klipy, AnimatorController, AnimatorOverrideController)
+├── Audio/       SFX (15), Music (2), MainMixer.mixer, AudioLibrary
+├── Materials/   ParticlesAdditive
+├── Data/Levels/ Level1–3 (ScriptableObject LevelConfig)
+└── Resources/   Systems.prefab, UiTheme, FxLibrary</pre>
+
+<h2>4.4 Fizyka i kolizje</h2>
+<p>Gracz i przeciwnicy mają dynamiczne <code>Rigidbody2D</code> (grawitacja 0, zablokowana rotacja) i <code>CircleCollider2D</code>. Pociski i przedmioty są ciałami kinematycznymi z colliderami ustawionymi jako <b>trigger</b>, ściany i filary to statyczne <code>BoxCollider2D</code>. O tym, co z czym koliduje, decyduje macierz warstw (<code>PhysicsSetup</code>):</p>
+<table>
+  <tr><th>Warstwa</th><th>Koliduje z</th><th>Obsługa</th></tr>
+  <tr><td>Player</td><td>Enemy, EnemyBullet, Pickup, Obstacle</td><td><code>OnCollisionStay2D</code> wroga → obrażenia; trigger przedmiotu → efekt</td></tr>
+  <tr><td>Enemy</td><td>Player, PlayerBullet, Obstacle, Enemy</td><td>wrogowie odpychają się nawzajem; Dryfer odbija się od ścian (<code>OnCollisionEnter2D</code>)</td></tr>
+  <tr><td>PlayerBullet / EnemyBullet</td><td>Enemy / Player oraz Obstacle</td><td><code>OnTriggerEnter2D</code> → <code>IDamageable.TakeDamage</code> albo zniszczenie na przeszkodzie</td></tr>
+  <tr><td>Pickup</td><td>Player</td><td><code>OnTriggerEnter2D</code> + <code>CompareTag("Player")</code></td></tr>
+</table>
+<p>Fala PULS korzysta z <code>Physics2D.OverlapCircleNonAlloc</code> z maską warstw Enemy i EnemyBullet, na stałym, wcześniej zaalokowanym buforze.</p>
+
+<h2>4.5 Animacje (Animator)</h2>
+<svg class="diagram" viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial" font-size="12">
+  <defs><marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b0207f"/></marker></defs>
+  <g fill="#fbe9f4" stroke="#b0207f" stroke-width="1.4">
+    <rect x="20" y="20" width="90" height="36" rx="18"/><rect x="20" y="95" width="90" height="36" rx="18"/>
+    <rect x="240" y="57" width="110" height="36" rx="18" fill="#eee" stroke="#888"/>
+    <rect x="450" y="10" width="100" height="36" rx="18"/><rect x="450" y="57" width="100" height="36" rx="18"/><rect x="450" y="104" width="100" height="36" rx="18"/>
+  </g>
+  <g text-anchor="middle" font-weight="600"><text x="65" y="43">IDLE</text><text x="65" y="118">RUN</text><text x="295" y="80">Any State</text><text x="500" y="33">ATTACK</text><text x="500" y="80">HURT</text><text x="500" y="127">DEAD</text></g>
+  <g stroke="#b0207f" stroke-width="1.3" fill="none" marker-end="url(#c)">
+    <path d="M55,56 L55,93"/><path d="M75,95 L75,58"/>
+    <path d="M350,68 L448,30"/><path d="M350,75 L448,75"/><path d="M350,82 L448,118"/>
+    <path d="M450,24 Q300,0 112,32"/><path d="M450,70 Q300,45 112,42"/>
+  </g>
+  <g font-size="10" fill="#5b6275"><text x="80" y="80">Speed &gt; 0,1 / &lt; 0,1</text><text x="370" y="40">Attack (trigger)</text><text x="370" y="70">Hurt (trigger)</text><text x="370" y="110">Dead = true</text><text x="250" y="16">po zakończeniu klipu (exit time)</text></g>
+</svg>
+<p>Gracz i przeciwnicy mają po 5 stanów: <b>Idle, Run, Attack, Hurt, Dead</b>. Przejścia z <i>Any State</i> do Attack i Hurt mają warunek <code>Dead == false</code>, więc martwy obiekt nie wraca do innych animacji. Klipy animują m.in. podmianę klatek płomienia silnika (krzywe <i>sprite</i>), skalę (odrzut przy strzale, „puchnięcie” przy trafieniu, zanikanie przy śmierci) oraz kanał alfa nakładki błysku. Łowca i Strzelec używają <code>AnimatorOverrideController</code>, który podmienia klip ataku na szarżę i ładowanie strzału, przy wspólnym kontrolerze bazowym.</p>
+</section>
+
+
+<section>
+<h1>5. Projekt interfejsu użytkownika</h1>
+<p>Interfejs zbudowano w Unity UI (uGUI). Każdy ekran ma <code>Canvas</code> w trybie <i>Screen Space – Overlay</i> z <code>CanvasScaler</code> (<i>Scale With Screen Size</i>, rozdzielczość referencyjna 1080×1920, dopasowanie 0,5), więc UI skaluje się na ekranach od 16:9 do 20:9. Elementy interaktywne leżą wewnątrz komponentu <code>SafeArea</code>, który omija wycięcia ekranu i pasek systemowy. Przyciski mają co najmniej 120 px wysokości w rozdzielczości referencyjnej (ok. 10 mm na telefonie), a przycisk PULS ma 240 px. Kolorystyka jest neonowa na ciemnym tle: cyjan to akcje główne, zielony – start i wznowienie, złoty – sklep i monety, czerwony – wyjście i niebezpieczeństwo. Zrzuty wykonano na emulatorze Android 14 (1080×2400).</p>
+<div class="shots">
+  <figure><img src="shots/02_menu.png"><figcaption>Rys. 1. Ekran startowy: nazwa gry, rekord, monety i przyciski Graj, Instrukcja, Ustawienia, Sklep, Ranking, Misje i Wyjście</figcaption></figure>
+  <figure><img src="shots/03_wybor_poziomu.png"><figcaption>Rys. 2. Wybór poziomu: poziomy 2 i 3 są zablokowane do czasu ukończenia poprzedniego</figcaption></figure>
+  <figure><img src="shots/04_instrukcja.png"><figcaption>Rys. 3. Instrukcja: cel, sterowanie, przeciwnicy, przedmioty i punktacja</figcaption></figure>
+</div>
+<div class="shots">
+  <figure><img src="shots/05_ustawienia.png"><figcaption>Rys. 4. Scena Settings: muzyka, efekty, głośność, wibracje, tryb 30 FPS, licznik FPS, nazwa gracza i reset postępu</figcaption></figure>
+  <figure><img src="shots/06_gra_odliczanie.png"><figcaption>Rys. 5. Start poziomu: nazwa poziomu i odliczanie 3-2-1</figcaption></figure>
+  <figure><img src="shots/07_gra_walka.png"><figcaption>Rys. 6. Rozgrywka: HUD (wynik, poziom, fala, HP, czas, monety), joystick, przycisk PULS i powiadomienie o osiągnięciu</figcaption></figure>
+</div>
+<div class="shots">
+  <figure><img src="shots/08_pauza.png"><figcaption>Rys. 7. Pauza: WZNÓW, OPCJE, RESTART POZIOMU, MENU; gra jest zatrzymana (timeScale = 0)</figcaption></figure>
+  <figure><img src="shots/09_opcje.png"><figcaption>Rys. 8. Opcje otwarte z pauzy (ten sam komponent SettingsPanel co w scenie Settings)</figcaption></figure>
+  <figure><img src="shots/11_poziom_ukonczony.png"><figcaption>Rys. 9. Podsumowanie poziomu z bonusami i przejściem do następnego poziomu</figcaption></figure>
+</div>
+<div class="shots">
+  <figure><img src="shots/12_game_over.png"><figcaption>Rys. 10. Ekran Game Over: wynik, rekord, statystyki i miejsce w rankingu</figcaption></figure>
+  <figure><img src="shots/13_sklep.png"><figcaption>Rys. 11. Sklep: skórki, broń, ulepszenia i power-upy za monety</figcaption></figure>
+  <figure><img src="shots/15_misje.png"><figcaption>Rys. 12. Misje z paskiem postępu i nagrodą oraz lista osiągnięć</figcaption></figure>
+</div>
+<div class="shots">
+  <figure><img src="shots/14_ranking.png"><figcaption>Rys. 13. Ranking: nazwa gracza, wynik, poziom i data</figcaption></figure>
+  <figure><img src="shots/18_poziom3.png"><figcaption>Rys. 14. Poziom 3: wszystkie trzy typy przeciwników, bonusy (turbo, monety) i utrata HP</figcaption></figure>
+  <figure><img src="shots/17_restart.png"><figcaption>Rys. 15. Restart poziomu: nowy, proceduralnie wygenerowany układ przeszkód</figcaption></figure>
+</div>
+<h2>5.1 Elementy HUD</h2>
+<table>
+  <tr><th>Element</th><th>Położenie</th><th>Opis</th></tr>
+  <tr><td>Wynik</td><td>lewy górny róg</td><td>aktualizowany zdarzeniem <code>ScoreChanged</code>, a nie w każdej klatce</td></tr>
+  <tr><td>Poziom i fala</td><td>środek paska</td><td>„POZIOM 1/3”, „FALA 2/3”, a przy starcie fali duży baner</td></tr>
+  <tr><td>Życie (HP)</td><td>pod wynikiem</td><td>ikony serc (pełne i puste), maks. 6</td></tr>
+  <tr><td>Czas</td><td>środek dolnej części paska</td><td>mm:ss; tekst zmienia się tylko przy zmianie pełnej sekundy</td></tr>
+  <tr><td>Monety</td><td>prawa strona paska</td><td>stan portfela</td></tr>
+  <tr><td>Stan gry</td><td>pod paskiem i na środku</td><td>TEMPO (dynamiczna trudność), liczba wrogów w fali, wskaźniki tarczy i turbo z czasem, banery i odliczanie</td></tr>
+  <tr><td>Pauza</td><td>prawy górny róg</td><td>okrągły przycisk 130 px</td></tr>
+  <tr><td>Joystick i PULS</td><td>dolne rogi</td><td>joystick pływający; PULS z radialnym wskaźnikiem odnowienia</td></tr>
+</table>
+</section>
+
+<section>
+<h1>6. Implementacja – najważniejsze klasy C#</h1>
+<table>
+  <tr><th style="width:24%">Klasa</th><th>Odpowiedzialność</th></tr>
+  <tr><td><code>GameManager</code></td><td>Maszyna stanów poziomu (Intro → Playing ⇄ Paused → LevelComplete / GameOver). Uruchamia generator areny, fale, bonusy i trudność; obsługuje pauzę (<code>Time.timeScale = 0</code>, pauza dźwięków), <code>OnApplicationPause</code>, przycisk Wstecz, warunki zwycięstwa i przegranej oraz zapis wyników.</td></tr>
+  <tr><td><code>WaveSpawner</code>, <code>WavePlanner</code></td><td>Korutyna fal: wylicza rozmiar fali (bazowy × TEMPO), losuje jej skład z wagami (ziarno <code>System.Random</code>), wybiera punkt na krawędzi z dala od gracza, pokazuje portal i spawnuje wroga z puli. Fala kończy się, gdy nie ma żywych ani oczekujących wrogów.</td></tr>
+  <tr><td><code>DifficultyDirector</code>, <code>DifficultyModel</code></td><td>Dynamiczna trudność: co 4 s ocena HP, zabójstw na minutę i czasu od trafienia; intensywność 0,8–1,4 zmienia prędkość, odstępy spawnu, szybkostrzelność i liczebność.</td></tr>
+  <tr><td><code>ArenaGenerator</code></td><td>Granice areny i proceduralne rozmieszczenie filarów (rejection sampling), punkty spawnu.</td></tr>
+  <tr><td><code>Player</code> + <code>PlayerController</code>, <code>PlayerHealth</code>, <code>PlayerShooter</code>, <code>PlayerPulse</code></td><td>Fasada gracza nakładająca ulepszenia ze sklepu (<code>PlayerLoadout</code>); ruch z joysticka po <code>Rigidbody2D</code>; HP z nietykalnością, tarczą i śmiercią; auto-celowanie w najbliższego wroga (<code>EnemyRegistry</code>) i strzał z puli; fala uderzeniowa przez <code>OverlapCircleNonAlloc</code>.</td></tr>
+  <tr><td><code>EnemyBase</code> + 3 podklasy</td><td>Wspólne HP, obrażenia kontaktowe, animacje, drop monet, punktacja i powrót do puli. Podklasy implementują tylko <code>Think()</code> (decyzje co 0,2 s) i <code>Tick()</code> (ruch, strzał).</td></tr>
+  <tr><td><code>Projectile</code></td><td>Pocisk z puli: prędkość kinematyczna, czas życia, trafienie przez interfejs <code>IDamageable</code>.</td></tr>
+  <tr><td><code>Pickup</code> + 4 podklasy</td><td>Wzorzec <i>template method</i>: baza obsługuje trigger, czas życia, miganie i magnes, a podklasy tylko metodę <code>Apply(Player)</code>.</td></tr>
+  <tr><td><code>PoolManager</code>, <code>ObjectPool</code>, <code>Poolable</code></td><td>Pule obiektów indeksowane prefabem, z rozgrzaniem (prewarm) przy starcie poziomu.</td></tr>
+  <tr><td><code>SaveSystem</code>, <code>SaveData</code></td><td>Zapis JSON (<code>JsonUtility</code>) do <code>persistentDataPath</code>: zapis atomowy przez plik tymczasowy, kopia <code>.bak</code>, odczyt z odtworzeniem domyślnych wartości po uszkodzeniu pliku.</td></tr>
+  <tr><td><code>ProgressTracker</code>, <code>MissionService</code>, <code>AchievementService</code>, <code>ShopService</code>, <code>Leaderboard</code></td><td>Logika metagry w czystych klasach C# (testowalnych w EditMode): monety, misje, osiągnięcia, zakupy, ranking top 10.</td></tr>
+  <tr><td><code>AudioManager</code></td><td>Singleton z AudioMixerem (parametry <code>MasterVolume</code>, <code>MusicVolume</code>, <code>SFXVolume</code> w dB), źródłem muzyki z płynnym przejściem, pulą 10 źródeł SFX i ograniczeniem powtórzeń tego samego dźwięku.</td></tr>
+  <tr><td><code>SceneLoader</code>, <code>SystemsBootstrap</code></td><td>Asynchroniczne ładowanie scen z przyciemnieniem; automatyczne tworzenie trwałych systemów przed pierwszą sceną.</td></tr>
+  <tr><td><code>Hud</code>, <code>VirtualJoystick</code>, <code>PauseMenu</code>, <code>SettingsPanel</code>, <code>MainMenu</code>, <code>GameOverScreen</code></td><td>Ekrany UI. Każdy ma metodę <code>BuildUI()</code>, którą generator wywołuje w edytorze, a referencje zapisują się jako pola <code>[SerializeField]</code> w scenie.</td></tr>
+  <tr><td><code>ProjectBuilder</code> (edytor)</td><td>Generuje sprite’y (SDF), dźwięki (synteza WAV), AudioMixer, klipy i kontrolery animacji, prefaby, poziomy (ScriptableObject) i sceny; konfiguruje warstwy, tagi, Player Settings i jakość.</td></tr>
+</table>
+
+<h2>6.1 Wybrane fragmenty kodu</h2>
+<h3>Zbieranie przedmiotu (trigger) – <code>Pickup</code> i <code>CoinPickup</code></h3>
+<pre>private void OnTriggerEnter2D(Collider2D other)
+{
+    if (collected || !other.CompareTag(Tags.Player) || !other.TryGetComponent&lt;Player&gt;(out var player) || !player.Health.IsAlive)
+        return;
+    collected = true;
+    Apply(player);                       // metoda abstrakcyjna, np. CoinPickup:
+    Fx.Sparkle(transform.position, color);
+    GameEvents.RaisePickupCollected(Kind);
+    Release();                           // powrót do puli zamiast Destroy()
+}
+
+protected override void Apply(Player player)   // CoinPickup
+{
+    ScoreManager.Add(ScoreRules.Coin, transform.position);   // +10 pkt
+    ProgressTracker.AddCoins(1);
+    AudioManager.Play(SfxId.Coin, 0.8f);
+}</pre>
+
+<h3>Pula obiektów – <code>ObjectPool.Get</code></h3>
+<pre>public Poolable Get(Vector3 position, Quaternion rotation)
+{
+    var item = free.Count &gt; 0 ? free.Pop() : Create();
+    item.transform.SetPositionAndRotation(position, rotation);
+    item.IsInPool = false;
+    item.gameObject.SetActive(true);   // OnEnable resetuje stan (HP, animator)
+    return item;
+}</pre>
+
+<h3>Obrażenia i nietykalność gracza – <code>PlayerHealth.TakeDamage</code></h3>
+<pre>if (IsShielded) { Fx.Hit(transform.position, shieldColor); return; }
+if (Time.time &lt; invulnerableUntil) return;
+current = Mathf.Max(0, current - amount);
+invulnerableUntil = Time.time + hitInvulnerability;   // 1,2 s migania
+rigidBody.AddForce(knockback, ForceMode2D.Impulse);
+animator.SetTrigger(HurtHash);
+AudioManager.Play(SfxId.PlayerHurt);
+GameEvents.RaisePlayerHealthChanged(current, max);
+if (current == 0) Die();                              // Animator: Dead = true</pre>
+
+<h3>Losowanie składu fali – <code>WavePlanner.PlanWave</code></h3>
+<pre>while (plan.Count &lt; count)
+{
+    var roll = random.Next(totalWeight);           // ziarno → powtarzalność (testy)
+    foreach (var entry in available)               // tylko typy odblokowane w tej fali
+    {
+        roll -= entry.weight;
+        if (roll &lt; 0) { plan.Add(entry.kind); break; }
+    }
+}</pre>
+
+<h3>Ustawienia dźwięku przez AudioMixer – <code>AudioManager.ApplySettings</code></h3>
+<pre>mixer.SetFloat("MasterVolume", LinearToDb(settings.volume));   // 20·log10(v)
+mixer.SetFloat("MusicVolume", settings.music ? 0f : -80f);
+mixer.SetFloat("SFXVolume",   settings.sfx   ? 0f : -80f);</pre>
+
+<h3>Zapis do JSON – <code>SaveSystem.Save</code></h3>
+<pre>var json = JsonUtility.ToJson(data, true);
+File.WriteAllText(path + ".tmp", json);          // najpierw plik tymczasowy
+if (File.Exists(path)) { File.Copy(path, path + ".bak", true); File.Delete(path); }
+File.Move(path + ".tmp", path);                  // podmiana – brak uszkodzonego zapisu</pre>
+<p>Przykładowy fragment pliku <code>save.json</code>:</p>
+<pre>{ "version": 1, "bestScore": 2500, "unlockedLevels": 3, "coins": 125,
+  "settings": { "music": true, "sfx": true, "volume": 0.8, "vibration": true,
+                "batterySaver": false, "showFps": false, "playerName": "Pilot" },
+  "stats": { "totalKills": 64, "totalCoins": 180, "levelsCompleted": 4, ... },
+  "leaderboard": [ { "name": "Pilot", "score": 2500, "level": 3, "date": "2026-11-14 11:20" } ],
+  "achievements": [ "a_first_blood", "a_untouchable" ],
+  "missions": [ { "id": "m_coins30", "progress": 12 }, ... ],
+  "ownedItems": [ "skin_classic", "upg_magnet" ], "selectedSkin": "skin_classic" }</pre>
+</section>
+
+
+<section>
+<h1>7. Testowanie</h1>
+<p>Testy przeprowadzono na trzech poziomach:</p>
+<ol>
+  <li><b>Testy jednostkowe EditMode</b> (NUnit, Unity Test Framework) – logika niezależna od sceny: zapis, ranking, sklep, misje, osiągnięcia, punktacja, plan fal, model trudności, sesja gry.</li>
+  <li><b>Testy integracyjne PlayMode</b> – ładowanie prawdziwych scen w edytorze i sprawdzanie przepływu gry: Boot → menu, start poziomu, spawn wrogów, pauza, śmierć gracza → Game Over, ukończenie poziomu → odblokowanie kolejnego, utrzymanie wrogów w arenie, ciągłość fal.</li>
+  <li><b>Testy manualne na emulatorze Android</b> – AVD Android 14 (API 34, x86_64, 1080×2400, 420 dpi), sterowanie gestami wstrzykiwanymi przez ADB (<code>input tap</code>, <code>input motionevent</code>, <code>keyevent BACK</code>), zrzuty ekranu przez <code>adb exec-out screencap</code>.</li>
+</ol>
+<p>Wszystkie testy automatyczne można uruchomić skryptem <code>Tools/verify.ps1</code>, który generuje zawartość, uruchamia testy EditMode i PlayMode oraz buduje APK.</p>
+
+<h2>7.1 Przypadki testowe (manualne i automatyczne)</h2>
+<table>
+  <tr><th style="width:5%">ID</th><th style="width:15%">Test</th><th style="width:22%">Warunki / kroki</th><th style="width:22%">Oczekiwany rezultat</th><th style="width:24%">Weryfikacja</th><th style="width:12%">Wynik</th></tr>
+  <tr><td>T01</td><td>Start gry</td><td>Uruchomienie aplikacji</td><td>Ekran Boot z paskiem ładowania, potem menu główne</td><td>Emulator (rys. 1); PlayMode <code>Boot_LoadsMainMenu</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T02</td><td>Start poziomu</td><td>Graj → Poziom 1</td><td>Scena Level1, baner poziomu i odliczanie 3-2-1</td><td>Emulator (rys. 5)</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T03</td><td>Ruch gracza</td><td>Dotyk i przeciągnięcie w lewej dolnej części ekranu</td><td>Joystick pojawia się pod palcem, statek płynie w kierunku wychylenia</td><td>Emulator (<code>input motionevent</code>)</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T04</td><td>Kolizja</td><td>Kontakt z przeciwnikiem lub jego pociskiem</td><td>Utrata 1 HP, miganie, 1,2 s nietykalności</td><td>PlayMode <code>Player_DiesAndGameOverSceneLoads</code> (HP 3→2, kolejny cios zablokowany); emulator – utrata serc na poziomie 3</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T05</td><td>Moneta</td><td>Kontakt z monetą</td><td>+10 pkt, +1 moneta w HUD</td><td>Emulator – licznik monet i wyniku rośnie</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T06</td><td>Pauza</td><td>Przycisk pauzy</td><td>Panel PAUZA, gra zatrzymana</td><td>Emulator (rys. 7); PlayMode – <code>Time.timeScale == 0</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T07</td><td>Wznów</td><td>Przycisk WZNÓW</td><td>Gra kontynuowana od tego samego stanu</td><td>Emulator; PlayMode – <code>timeScale == 1</code>, stan Playing</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T08</td><td>Game Over</td><td>HP spada do 0</td><td>Animacja śmierci, ekran KONIEC GRY z wynikiem</td><td>Emulator (rys. 10, poziom 3); PlayMode</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T09</td><td>Zapis</td><td>Ukończenie poziomu</td><td>Rekord, odblokowany poziom i monety zapisane w <code>save.json</code></td><td>Emulator – po zamknięciu aplikacji rekord 2 265 i odblokowany poziom 2</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T10</td><td>Odczyt</td><td>Ponowne uruchomienie aplikacji</td><td>Rekord, monety, ustawienia i ranking odczytane</td><td>Emulator – <code>force-stop</code> i reinstalacja z zachowaniem danych; EditMode <code>SaveSystem_RoundTrips…</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T11</td><td>Dźwięk</td><td>Muzyka / Efekty = WYŁ.</td><td>Brak muzyki / efektów</td><td>Emulator – przełącznik zmienia stan i jest zapamiętany; wyciszenie parametrem AudioMixera −80 dB</td><td class="ok">Zaliczony (stan); odsłuch do potwierdzenia na telefonie</td></tr>
+  <tr><td>T12</td><td>Ustawienia</td><td>Zmiana głośności suwakiem</td><td>Wartość % się zmienia i zostaje zapamiętana</td><td>Emulator – 80% → 20%, wartość zachowana po ponownym wejściu</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T13</td><td>Level 2</td><td>Ukończenie poziomu 1</td><td>Podsumowanie z przyciskiem NASTĘPNY POZIOM, poziom 2 odblokowany</td><td>Emulator (rys. 9); PlayMode <code>Level1_ClearingAllWavesUnlocksLevel2</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T14</td><td>Restart</td><td>Pauza → RESTART POZIOMU</td><td>Poziom od nowa: czas 00:00, fala 0/3, wynik z początku poziomu, nowy układ przeszkód</td><td>Emulator; EditMode <code>GameSession_Restart…</code></td><td class="ok">Zaliczony (po poprawce)</td></tr>
+  <tr><td>T15</td><td>Wyjście</td><td>Przycisk WYJŚCIE</td><td>Aplikacja kończy działanie</td><td>Emulator – logcat: proces aplikacji zakończony</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T16</td><td>PULS</td><td>Przycisk PULS przy wrogach</td><td>Fala uderzeniowa: obrażenia i odrzut, radialny wskaźnik odnowienia</td><td>Emulator</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T17</td><td>Przycisk Wstecz</td><td>Systemowe „Wstecz” w opcjach pauzy i w Ustawieniach</td><td>Zamknięcie panelu / powrót do menu</td><td>Emulator (<code>keyevent 4</code>)</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T18</td><td>Przeszkody</td><td>Wróg i gracz po dwóch stronach filaru</td><td>Pociski zatrzymują się na filarze, wróg omija przeszkodę, fale się kończą</td><td>Emulator; PlayMode <code>Level2_IdlePlayerWavesKeepProgressing</code></td><td class="ok">Zaliczony (po poprawce)</td></tr>
+  <tr><td>T19</td><td>Ranking</td><td>Zakończenie gry</td><td>Wpis z nazwą, wynikiem, poziomem i datą</td><td>Emulator (rys. 13); EditMode <code>Leaderboard_…</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T20</td><td>Misje i osiągnięcia</td><td>Pokonanie 1. i 20. wroga</td><td>Powiadomienie, osiągnięcie „Pierwsza krew”, nagroda +50 monet</td><td>Emulator (rys. 6, monety 2 → 52); EditMode</td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T21</td><td>Sklep</td><td>Zakup bez wystarczającej liczby monet / z monetami</td><td>Przycisk nieaktywny / odjęcie monet i działanie ulepszenia</td><td>Emulator (przyciski nieaktywne przy 52 monetach); EditMode <code>Shop_…</code></td><td class="ok">Zaliczony</td></tr>
+  <tr><td>T22</td><td>Rozdzielczość</td><td>Ekran 1080×2400 (20:9) z paskiem statusu</td><td>UI w strefie bezpiecznej, nic nie jest ucięte, przyciski ≥ 10 mm</td><td>Emulator (wszystkie zrzuty)</td><td class="ok">Zaliczony</td></tr>
+</table>
+
+<h2>7.2 Testy automatyczne</h2>
+<table>
+  <tr><th>Test</th><th>Rodzaj</th><th>Co sprawdza</th><th>Wynik</th></tr>
+  <tr><td><code>SaveSystem_RoundTripsProgressAndSettings</code></td><td>EditMode</td><td>zapis i odczyt JSON: rekord, poziomy, monety, ustawienia</td><td class="ok">OK</td></tr>
+  <tr><td><code>SaveSystem_RecoversFromCorruptedFileUsingDefaults</code></td><td>EditMode</td><td>uszkodzony plik zapisu → wartości domyślne zamiast awarii</td><td class="ok">OK</td></tr>
+  <tr><td><code>Leaderboard_KeepsTopTenSortedDescending</code></td><td>EditMode</td><td>ranking ma maks. 10 pozycji, sortowanie malejące</td><td class="ok">OK</td></tr>
+  <tr><td><code>Shop_BuyingDeductsCoinsAndRespectsMaxLevel</code></td><td>EditMode</td><td>zakup odejmuje monety, limit poziomu ulepszenia, efekt w loadoucie</td><td class="ok">OK</td></tr>
+  <tr><td><code>Shop_RefusesPurchaseWithoutCoins</code></td><td>EditMode</td><td>brak zakupu przy zbyt małej liczbie monet</td><td class="ok">OK</td></tr>
+  <tr><td><code>Missions_CompletingGrantsRewardAndRefillsSlots</code></td><td>EditMode</td><td>nagroda za misję i uzupełnienie do 3 aktywnych</td><td class="ok">OK</td></tr>
+  <tr><td><code>Achievements_UnlockOnce</code></td><td>EditMode</td><td>osiągnięcie odblokowuje się tylko raz</td><td class="ok">OK</td></tr>
+  <tr><td><code>ScoreRules_TimeBonusRewardsFasterClears</code></td><td>EditMode</td><td>bonus czasowy i punkty za typy wrogów</td><td class="ok">OK</td></tr>
+  <tr><td><code>WavePlanner_IsDeterministicForSeedAndRespectsUnlockWave</code></td><td>EditMode</td><td>powtarzalność dla ziarna, typy wrogów od właściwej fali</td><td class="ok">OK</td></tr>
+  <tr><td><code>DifficultyModel_StaysWithinBounds</code></td><td>EditMode</td><td>dynamiczna trudność w zakresie 0,8–1,4</td><td class="ok">OK</td></tr>
+  <tr><td><code>FinishRun_FlagsNewRecord…</code></td><td>EditMode</td><td>flaga „Nowy rekord” i wpis do rankingu</td><td class="ok">OK</td></tr>
+  <tr><td><code>GameSession_RestartRestoresScoreFromLevelStart</code></td><td>EditMode</td><td>restart przywraca wynik z początku poziomu</td><td class="ok">OK</td></tr>
+  <tr><td><code>Boot_LoadsMainMenu</code></td><td>PlayMode</td><td>Boot → MainMenu, otwarcie wyboru poziomu bez błędów</td><td class="ok">OK</td></tr>
+  <tr><td><code>SettingsScene_Loads</code></td><td>PlayMode</td><td>scena ustawień z otwartym panelem</td><td class="ok">OK</td></tr>
+  <tr><td><code>Level1_StartsSpawnsEnemiesAndPauses</code></td><td>PlayMode</td><td>start poziomu, 3 HP, spawn wrogów, pauza i wznowienie</td><td class="ok">OK</td></tr>
+  <tr><td><code>Player_DiesAndGameOverSceneLoads</code></td><td>PlayMode</td><td>obrażenia, nietykalność, śmierć → scena GameOver, statystyki</td><td class="ok">OK</td></tr>
+  <tr><td><code>Level1_ClearingAllWavesUnlocksLevel2</code></td><td>PlayMode</td><td>ukończenie wszystkich fal → odblokowanie poziomu 2, bonus 500</td><td class="ok">OK</td></tr>
+  <tr><td><code>Enemies_StayInsideArenaAfterStrongKnockback</code></td><td>PlayMode</td><td>test regresyjny: wrogowie nie wylatują poza arenę</td><td class="ok">OK</td></tr>
+  <tr><td><code>Level2_IdlePlayerWavesKeepProgressing</code></td><td>PlayMode</td><td>test regresyjny: fale poziomu 2 kończą się bez zawieszenia</td><td class="ok">OK</td></tr>
+  <tr><td><code>ReusedEnemyFromPool_HasFullSizeVisualAndIsNotDead</code></td><td>PlayMode</td><td>obiekt z puli wraca z poprawnym stanem animacji</td><td class="ok">OK</td></tr>
+</table>
+
+<h2>7.3 Błędy wykryte i naprawione podczas testów</h2>
+<table>
+  <tr><th style="width:28%">Objaw</th><th style="width:36%">Przyczyna</th><th>Poprawka</th></tr>
+  <tr><td>Wyjątek <code>NullReferenceException</code> przy wejściu do menu, przyciski wyboru poziomu nie działały</td><td>Generator UI nie zapisywał referencji przycisków w tablicy <code>levelButtons</code></td><td>Uzupełnienie przypisania; test PlayMode <code>Boot_LoadsMainMenu</code> otwiera panel wyboru poziomu</td></tr>
+  <tr><td>Fala nie kończyła się, licznik wrogów &gt; 0, a na ekranie brak przeciwników</td><td>PULS przy samej ścianie „przepychał” wroga przez cienki (0,3 j.) collider ściany</td><td>Collidery ścian o grubości 2 j. skierowane na zewnątrz, ciągła detekcja kolizji wrogów, zabezpieczenie <code>KeepInsideArena</code>, słabszy odrzut; test regresyjny <code>Enemies_StayInsideArenaAfterStrongKnockback</code></td></tr>
+  <tr><td>Łowca „zawieszał się” za filarem; statek strzelał w filar</td><td>Brak omijania przeszkód i sprawdzania linii strzału</td><td><code>AvoidObstacles</code> (CircleCast + ruch wzdłuż krawędzi), wybór celu z linią wzroku (<code>FindNearestVisible</code>)</td></tr>
+  <tr><td>Żywy Dryfer miał zmniejszony do kropki sprite</td><td>Po powrocie z puli Animator mógł zachować skalę z animacji śmierci (kolejność ponownego wiązania na urządzeniu)</td><td>Reset stanu wizualnego i <code>Animator.Rebind()</code> przed zwrotem do puli oraz zabezpieczenie w <code>Think()</code></td></tr>
+  <tr><td>Nagroda za misję znikała po zamknięciu aplikacji</td><td>Zapis tylko na końcu poziomu</td><td>Zapis przy pauzie aplikacji (<code>AppLifecycle</code>), po ukończeniu misji i odblokowaniu osiągnięcia</td></tr>
+  <tr><td>Po restarcie poziomu wynik startował od 100 pkt</td><td>Scena działała jeszcze podczas wygaszania ekranu i naliczała punkty</td><td><code>SceneLoader</code> zatrzymuje czas gry (<code>timeScale = 0</code>) na czas przejścia</td></tr>
+  <tr><td>Długa nazwa w sklepie nachodziła na opis</td><td>Za wąska kolumna nazwy</td><td>Poprawiony układ wiersza sklepu</td></tr>
+</table>
+</section>
+
+
+<section>
+<h1>8. Optymalizacja</h1>
+<p>Zastosowano dziewięć technik optymalizacji (wymagane były co najmniej trzy):</p>
+<table>
+  <tr><th style="width:26%">Technika</th><th>Realizacja w projekcie</th><th style="width:22%">Efekt</th></tr>
+  <tr><td><b>Object pooling</b></td><td><code>PoolManager</code>/<code>ObjectPool</code> dla pocisków gracza (prewarm 30) i wrogów (20), przeciwników (3×8), monet i bonusów, efektów cząsteczkowych i napisów „+100”. Obiekty są wyłączane i ponownie używane, a nie niszczone (<code>Destroy</code>) i tworzone (<code>Instantiate</code>) w czasie gry.</td><td>brak alokacji i skoków GC podczas walki</td></tr>
+  <tr><td><b>Ograniczenie pracy w <code>Update()</code></b></td><td>AI wrogów podejmuje decyzje co 0,2 s z losowym przesunięciem fazy (<code>Think()</code>), a dynamiczna trudność liczy się co 4 s. HUD aktualizuje wynik, HP i monety przez zdarzenia, a czas tylko przy zmianie sekundy. Hashe parametrów Animatora (<code>Animator.StringToHash</code>) i komponenty są cache’owane w <code>Awake</code>.</td><td>mniej pracy na klatkę, mniej alokacji stringów</td></tr>
+  <tr><td><b>Rejestr wrogów zamiast wyszukiwania</b></td><td><code>EnemyRegistry</code> (lista aktywnych wrogów) zamiast <code>FindObjectsOfType</code>; wyszukiwanie najbliższego celu porównuje kwadraty odległości (<code>sqrMagnitude</code>, bez pierwiastka).</td><td>O(n) bez skanowania sceny</td></tr>
+  <tr><td><b>Fizyka bez alokacji</b></td><td>PULS używa <code>Physics2D.OverlapCircleNonAlloc</code> ze stałym buforem. Macierz kolizji warstw wyłącza zbędne pary (np. pocisk–pocisk, pocisk–przedmiot). Pociski są kinematyczne.</td><td>mniej par kolizji do sprawdzenia</td></tr>
+  <tr><td><b>Atlas sprite’ów</b></td><td>Wszystkie sprite’y gry i UI (oprócz kafelkowanego tła) trafiają do jednego <i>Sprite Atlas</i>.</td><td>batching: mniej draw calls</td></tr>
+  <tr><td><b>Kompresja i optymalizacja tekstur</b></td><td>ASTC 6×6 dla Androida, wyłączone mipmapy (gra 2D w stałej skali), rozmiary 32–256 px, maksymalny rozmiar tekstury równy rozmiarowi źródła.</td><td>mniejszy APK i zużycie VRAM</td></tr>
+  <tr><td><b>Kompresja audio</b></td><td>Efekty: ADPCM, mono, <i>Decompress On Load</i> (krótkie, odtwarzane bez opóźnień). Muzyka: Vorbis (jakość 45%), mono, <i>Streaming</i>, ładowanie w tle. Pula 10 źródeł <code>AudioSource</code> z ograniczeniem powtórzeń tego samego dźwięku (np. strzał nie częściej niż co 60 ms).</td><td>mniej RAM i CPU na audio</td></tr>
+  <tr><td><b>Ustawienia jakości i renderowania</b></td><td>Wyłączone cienie, antyaliasing, oświetlenie pikselowe, odbicia i miękkie cząsteczki. Przestrzeń kolorów Gamma, OpenGL ES 3, wielowątkowe renderowanie, <i>Optimized Frame Pacing</i>, <code>targetFrameRate</code> 60 (30 w trybie oszczędzania baterii), brak HDR i MSAA w kamerze.</td><td>stabilne 60 FPS, niższe zużycie baterii</td></tr>
+  <tr><td><b>Limity efektów i budowy</b></td><td>Maks. 6 efektów nieistotnych (iskry, napisy) na klatkę, maksymalna liczba jednoczesnych wrogów na poziom (6/8/11), <code>maxParticles</code> ograniczone do 2× wielkości wybuchu. IL2CPP z <i>Managed Stripping</i> (Low), usunięte zbędne pakiety (Ads, IAP, Analytics, Timeline, TextMeshPro), osobne assembly definitions.</td><td>przewidywalne obciążenie, APK 25 MB</td></tr>
+</table>
+<p>Wydajność można kontrolować wbudowanym licznikiem FPS (Ustawienia → Licznik FPS), który pokazuje też liczbę pul i obiektów w pulach.</p>
+</section>
+
+<section>
+<h1>9. Podsumowanie</h1>
+<h2>9.1 Wnioski</h2>
+<p>Zrealizowano kompletną grę mobilną na Androida, która spełnia wszystkie wymagania podstawowe projektu (ekran startowy, sterowanie dotykowe, punktacja, przeciwnicy i przeszkody, warunki zwycięstwa i przegranej, HP i Game Over, 3 poziomy o rosnącej trudności, HUD, pauza, zapis, dźwięk z AudioMixerem, ustawienia, animacje w Animatorze, fizyka 2D, przedmioty, optymalizacja, testy). Zrealizowano też wszystkie pozycje A–I z listy wymagań dodatkowych: ranking, osiągnięcia, sklep, walutę, dynamiczną trudność, lokalną tabelę wyników, proceduralne generowanie, object pooling i misje.</p>
+<p>Najważniejsze wnioski z realizacji:</p>
+<ul>
+  <li>Sterowanie na jeden kciuk (pływający joystick + automatyczny ogień) dobrze sprawdza się na małym ekranie. Decyzja taktyczna została przeniesiona na ruch i moment użycia PULSU.</li>
+  <li>Szyna zdarzeń (<code>GameEvents</code>) bardzo uprościła dodawanie funkcji metagry: misje, osiągnięcia i dynamiczna trudność nie wymagały zmian w klasach gracza ani przeciwników.</li>
+  <li>Wydzielenie logiki do czystych klas C# (sklep, misje, ranking, plan fal, model trudności, zapis) pozwoliło pokryć ją szybkimi testami EditMode. Testy PlayMode wykryły realne błędy integracji, np. niepodpięte referencje przycisków wyboru poziomu.</li>
+  <li>Testy na emulatorze ujawniły problem, którego nie widać w testach jednostkowych: fala uderzeniowa przy samej ścianie potrafiła „przepchnąć” przeciwnika przez cienki collider, przez co fala nie mogła się zakończyć. Rozwiązanie: grubsze collidery ścian, ciągła detekcja kolizji wrogów i zabezpieczenie utrzymujące obiekty w granicach areny (oraz test regresyjny).</li>
+  <li>Generowanie zawartości kodem (grafika SDF, synteza dźwięku, sceny i prefaby) daje w pełni odtwarzalny projekt bez zewnętrznych zasobów i problemów licencyjnych.</li>
+</ul>
+<h2>9.2 Możliwe kierunki rozwoju</h2>
+<ul>
+  <li>Ranking online i konta graczy (REST API, np. własny serwer lub Unity Gaming Services), zapis w chmurze.</li>
+  <li>Walka z bossem na końcu poziomu 3 i więcej typów przeciwników (np. dzielący się rój, kamikaze).</li>
+  <li>Tryb nieskończony z proceduralnymi falami i rosnącą trudnością.</li>
+  <li>Grafika ręcznie rysowana lub efekty postprocessingu (bloom) przy przejściu na URP 2D.</li>
+  <li>Lokalizacja (angielski) oraz opcje dostępności: tryb dla daltonistów, większy joystick, joystick stały zamiast pływającego.</li>
+  <li>Publikacja w Google Play: Android App Bundle, podpis produkcyjny, analityka i raporty błędów.</li>
+</ul>
+</section>
+</body>
+</html>

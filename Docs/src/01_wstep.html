@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Neon Swarm – dokumentacja projektu</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+  :root { --ink:#16192a; --muted:#5b6275; --accent:#0d8fa8; --accent2:#b0207f; --line:#d9dce5; --soft:#f3f5f9; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", "Calibri", Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 20pt; color: var(--accent); margin: 0 0 10pt; border-bottom: 2px solid var(--accent); padding-bottom: 4pt; }
+  h2 { font-size: 13.5pt; color: var(--ink); margin: 16pt 0 6pt; }
+  h3 { font-size: 11.5pt; color: var(--accent2); margin: 12pt 0 4pt; }
+  p { margin: 0 0 7pt; text-align: justify; }
+  ul, ol { margin: 0 0 8pt 18pt; padding: 0; }
+  li { margin-bottom: 3pt; }
+  section { page-break-before: always; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; font-size: 9.5pt; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+  th { background: var(--accent); color: #fff; text-align: left; padding: 4pt 6pt; font-weight: 600; }
+  td { border-bottom: 1px solid var(--line); padding: 4pt 6pt; vertical-align: top; }
+  tr:nth-child(even) td { background: var(--soft); }
+  code, pre { font-family: Consolas, "Cascadia Mono", monospace; font-size: 8.6pt; }
+  pre { background: #0f1322; color: #d7e3ff; padding: 8pt 10pt; border-radius: 6pt; white-space: pre-wrap; page-break-inside: avoid; margin: 4pt 0 10pt; }
+  .note { background: var(--soft); border-left: 3px solid var(--accent); padding: 6pt 10pt; margin: 8pt 0; }
+  .ok { color: #1a8a3a; font-weight: 600; }
+  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin: 8pt 0; }
+  .shots.two { grid-template-columns: repeat(2, 1fr); }
+  figure { margin: 0; page-break-inside: avoid; text-align: center; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 6pt; }
+  figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 3pt; }
+  .title-page { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .title-top { text-align: center; color: var(--muted); font-size: 11pt; letter-spacing: .5pt; }
+  .title-main { text-align: center; }
+  .title-main .logo { width: 150pt; height: 150pt; border-radius: 24pt; }
+  .title-main h1 { border: 0; font-size: 34pt; margin: 14pt 0 4pt; color: #0b1020; letter-spacing: 2pt; }
+  .title-main .subtitle { font-size: 13pt; color: var(--muted); }
+  .meta { width: 75%; margin: 0 auto; font-size: 11pt; }
+  .meta td { border: 0; padding: 4pt 6pt; background: none !important; }
+  .meta td:first-child { color: var(--muted); width: 38%; }
+  .toc li { margin-bottom: 4pt; }
+  .diagram { width: 100%; margin: 6pt 0 10pt; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt; }
+</style>
+</head>
+<body>
+
+<div class="title-page">
+  <div class="title-top">PROJEKT ZALICZENIOWY · WARIANT INDYWIDUALNY</div>
+  <div class="title-main">
+    <img class="logo" src="../Assets/Sprites/Icon/AppIcon.png" alt="Ikona gry">
+    <h1>NEON SWARM</h1>
+    <div class="subtitle">Mobilna gra zręcznościowa 2D na system Android wykonana w silniku Unity</div>
+  </div>
+  <table class="meta">
+    <tr><td>Imię i nazwisko</td><td><b>Patrycja Brodzik</b></td></tr>
+    <tr><td>Numer albumu</td><td><b>50708</b></td></tr>
+    <tr><td>Kierunek</td><td><b>Informatyka</b></td></tr>
+    <tr><td>Przedmiot</td><td>Programowanie gier mobilnych</td></tr>
+    <tr><td>Temat projektu</td><td>Zaprojektowanie i wykonanie kompletnej gry mobilnej 2D „Neon Swarm” w silniku Unity</td></tr>
+    <tr><td>Rok akademicki</td><td>2026/2027</td></tr>
+    <tr><td>Silnik / język</td><td>Unity 2022.3.62f3 LTS / C#</td></tr>
+  </table>
+</div>
+
+<section>
+<h1>Spis treści</h1>
+<ol class="toc">
+  <li>Opis projektu</li>
+  <li>Założenia projektu</li>
+  <li>Mechanika gry</li>
+  <li>Architektura</li>
+  <li>Projekt interfejsu użytkownika</li>
+  <li>Implementacja – najważniejsze klasy C#</li>
+  <li>Testowanie</li>
+  <li>Optymalizacja</li>
+  <li>Podsumowanie</li>
+</ol>
+
+<h1 style="margin-top:22pt">1. Opis projektu</h1>
+<table>
+  <tr><th style="width:30%">Pozycja</th><th>Opis</th></tr>
+  <tr><td>Nazwa gry</td><td><b>Neon Swarm</b></td></tr>
+  <tr><td>Gatunek</td><td>gra zręcznościowa (arcade), top-down arena shooter 2D z elementami progresji (sklep, misje, osiągnięcia)</td></tr>
+  <tr><td>Platforma</td><td>Android 7.0 (API 24) i nowsze, architektury ARM64 i x86_64, orientacja pionowa (portrait)</td></tr>
+  <tr><td>Grupa docelowa</td><td>gracze mobilni od 10. roku życia, lubiący krótkie, dynamiczne sesje (3–6 minut na poziom), np. w komunikacji miejskiej. Gra nie zawiera przemocy wobec ludzi: przeciwnikami są abstrakcyjne, neonowe drony.</td></tr>
+  <tr><td>Tryb</td><td>jednoosobowy, offline. Wszystkie dane zapisują się lokalnie na urządzeniu.</td></tr>
+  <tr><td>Wersja</td><td>1.0.0 (versionCode 1), pakiet <code>com.neonswarm.game</code></td></tr>
+</table>
+<p>Gracz kieruje neonowym statkiem zamkniętym na arenie, którą atakują kolejne fale roju dronów. Statek sam celuje i strzela w najbliższego przeciwnika, więc zadaniem gracza jest manewrowanie: unikanie kontaktu z wrogami i ich pocisków, zbieranie bonusów oraz trafne użycie fali uderzeniowej (PULS). Gra ma trzy poziomy o rosnącej trudności, a ukończenie trzeciego oznacza zwycięstwo.</p>
+<p>Oprócz wymagań podstawowych zrealizowano zakres rozszerzony: ranking, osiągnięcia, sklep, walutę, dynamiczną trudność, lokalną tabelę wyników, proceduralne generowanie poziomu, object pooling oraz system misji. Projekt ma też komplet scen z wariantu rozszerzonego (Boot, MainMenu, Level1–3, Settings, GameOver), trzy typy przeciwników i cztery rodzaje przedmiotów.</p>
+
+<h1 style="margin-top:22pt">2. Założenia projektu</h1>
+<h3>Problem</h3>
+<p>Gry akcji na telefony często przenoszą schemat sterowania z konsol (dwa joysticki, wiele przycisków), który na małym ekranie dotykowym bywa nieprecyzyjny i męczący. Kciuki zasłaniają obraz, a gracz musi jednocześnie celować i się poruszać. Krótkie sesje mobilne wymagają też, żeby rozgrywka zaczynała się natychmiast i dawała szybkie poczucie postępu.</p>
+<h3>Cel gry</h3>
+<ul>
+  <li>Zaprojektować rozgrywkę na jeden kciuk: ruch pływającym joystickiem i automatyczny ogień, a jedyną decyzją taktyczną poza ruchem jest moment użycia PULSU.</li>
+  <li>Dać jasno określony cel: <b>przetrwać wszystkie fale na trzech poziomach</b>. Przegrana następuje po utracie wszystkich punktów życia.</li>
+  <li>Utrzymać zaangażowanie przez progresję: punkty, monety, sklep z ulepszeniami, misje, osiągnięcia i lokalny ranking.</li>
+  <li>Zapewnić płynne działanie (docelowo 60 FPS) dzięki optymalizacjom: puli obiektów, atlasowi sprite’ów, kompresji ASTC i ograniczeniu pracy w <code>Update()</code>.</li>
+  <li>Wykorzystać praktycznie: sceny Unity, fizykę 2D, Animator, AudioMixer, UI z obsługą różnych rozdzielczości i safe area, zapis w JSON oraz testy jednostkowe.</li>
+</ul>
+<h3>Ograniczenia i decyzje</h3>
+<ul>
+  <li>Orientacja pionowa: gra jest zaprojektowana do trzymania telefonu jedną ręką.</li>
+  <li>Grafika, dźwięki i muzyka są generowane proceduralnie przez skrypt edytora (<code>ProjectBuilder</code>), dzięki czemu projekt nie korzysta z zasobów o niejasnej licencji, a całą zawartość można odtworzyć jednym poleceniem.</li>
+  <li>Brak połączeń sieciowych: ranking i zapis są lokalne, co upraszcza wymagania dotyczące prywatności.</li>
+</ul>
+</section>
+
+<section>
+<h1>3. Mechanika gry</h1>
+<h2>3.1 Ruch i sterowanie</h2>
+<p>Wybrano <b>wariant B – wirtualny joystick</b>, uzupełniony przyciskiem akcji. Joystick jest „pływający”: pojawia się w miejscu, w którym gracz dotknie lewej dolnej części ekranu (ok. 60% szerokości × 40% wysokości strefy bezpiecznej). Wychylenie gałki (z martwą strefą 12%) ustala kierunek i prędkość statku (maks. 5,6 j/s). Ruch realizuje <code>Rigidbody2D</code> z płynnym przyspieszaniem (<code>Vector2.MoveTowards</code> na prędkości), więc statek ma lekką bezwładność.</p>
+<p><b>Uzasadnienie wyboru:</b> joystick daje ciągły ruch w 360°, niezbędny do unikania pocisków na arenie. Przyciski kierunkowe (wariant A) ograniczają ruch do 8 kierunków, gesty (wariant C) są dyskretne i nie nadają się do ciągłego manewrowania, a akcelerometr (wariant D) jest mniej precyzyjny, męczy przy dłuższej grze i nie działa wygodnie, gdy gracz leży lub siedzi w pojeździe. Pływający joystick nie wymaga patrzenia na kontroler, bo kciuk zawsze trafia w jego środek. Automatyczne celowanie zwalnia drugi kciuk, którym gracz tylko od czasu do czasu naciska duży przycisk PULS (240 px przy 1080×1920).</p>
+<table>
+  <tr><th>Sterowanie</th><th>Działanie</th></tr>
+  <tr><td>Dotyk + przeciągnięcie (lewy dół)</td><td>ruch statku</td></tr>
+  <tr><td>Automatycznie</td><td>obrót i ogień w kierunku najbliższego wroga w zasięgu 9 j., do którego jest czysta linia strzału (co 0,3 s)</td></tr>
+  <tr><td>Przycisk PULS (prawy dół)</td><td>fala uderzeniowa o promieniu 2,8 j.: 2 obrażenia, odrzut, kasuje wrogie pociski; odnowienie 8 s</td></tr>
+  <tr><td>Przycisk pauzy / „Wstecz” Androida</td><td>pauza; w menu „Wstecz” zamyka otwarty panel</td></tr>
+</table>
+
+<h2>3.2 Walka</h2>
+<p>Pociski gracza (<code>Projectile</code>, kinematyczne ciało z triggerem) zadają 1 obrażenie i lekko odrzucają wroga. Przeciwnicy ranią gracza kontaktem (<code>OnCollisionStay2D</code>), a Strzelec także pociskami. Po trafieniu gracz ma 1,2 s nietykalności (miganie sprite’a), dostaje odrzut, ekran się trzęsie i telefon wibruje (opcjonalnie). Przedmiot „Turbo” podwaja szybkostrzelność, a „Tarcza” całkowicie blokuje obrażenia.</p>
+
+<h2>3.3 Przeciwnicy</h2>
+<table>
+  <tr><th>Typ</th><th>Wygląd</th><th>Zachowanie</th><th>HP</th><th>Punkty</th></tr>
+  <tr><td><b>Dryfer</b> (Enemy 1)</td><td>różowy romb</td><td>porusza się poziomo z falowaniem w pionie i powoli dryfuje w stronę wysokości gracza; odbija się od ścian i przeszkód</td><td>1</td><td>100</td></tr>
+  <tr><td><b>Łowca</b> (Enemy 2)</td><td>pomarańczowa gwiazda</td><td>śledzi gracza, omijając filary (CircleCast); w odległości &lt; 2,8 j. wykonuje szarżę (2,6× prędkość przez 0,35 s, odnowienie 2,2 s)</td><td>2</td><td>150</td></tr>
+  <tr><td><b>Strzelec</b> (Enemy 3)</td><td>zielony sześciokąt z lufą</td><td>atakuje z dystansu: utrzymuje odległość ~4,6 j. i linię strzału, krąży wokół gracza, co 2,4 s ładuje strzał (0,4 s sygnalizacji) i strzela pociskiem</td><td>3</td><td>200</td></tr>
+</table>
+<p>AI każdego wroga podejmuje decyzje co 0,2 s (metoda <code>Think()</code>), a w każdej klatce wykonuje tylko tanie operacje (<code>Tick()</code>). Każdy wróg pojawia się po 0,6 s sygnalizacji: na krawędzi areny wiruje portal, a punkt spawnu jest wybierany możliwie daleko od gracza (co najmniej 3,8 j.).</p>
+
+<h2>3.4 Przedmioty (obiekty interaktywne)</h2>
+<table>
+  <tr><th>Przedmiot</th><th>Efekt</th><th>Źródło</th></tr>
+  <tr><td>Moneta</td><td>+10 pkt, +1 moneta do sklepu; przyciągana magnesem</td><td>wypada z wrogów (50–65%), grupy po 4</td></tr>
+  <tr><td>Apteczka</td><td>+1 HP (przy pełnym zdrowiu +25 pkt)</td><td>losowo co ~10–12 s; częściej przy 1 HP</td></tr>
+  <tr><td>Tarcza (power-up)</td><td>5 s nieśmiertelności (bańka wokół statku)</td><td>losowo</td></tr>
+  <tr><td>Turbo (power-up)</td><td>6 s podwójnej szybkostrzelności</td><td>losowo</td></tr>
+</table>
+<p>Przedmioty znikają po 9–10 s, a przez ostatnie 2,5 s migają.</p>
+
+<h2>3.5 Punktacja</h2>
+<table>
+  <tr><th>Akcja</th><th>Punkty</th></tr>
+  <tr><td>Pokonanie Dryfera / Łowcy / Strzelca</td><td>+100 / +150 / +200</td></tr>
+  <tr><td>Zebranie monety</td><td>+10</td></tr>
+  <tr><td>Zebranie power-upu (tarcza, turbo)</td><td>+20</td></tr>
+  <tr><td>Ukończenie poziomu</td><td>+500</td></tr>
+  <tr><td>Bonus czasowy</td><td>+50 za każde rozpoczęte 10 s poniżej czasu „par” poziomu (75 / 110 / 150 s)</td></tr>
+  <tr><td>Poziom ukończony bez obrażeń</td><td>+250</td></tr>
+</table>
+<p>Wynik przechodzi między poziomami jednej rozgrywki. Restart poziomu przywraca wynik z chwili jego rozpoczęcia.</p>
+
+<h2>3.6 Poziomy</h2>
+<table>
+  <tr><th>Poziom</th><th>Liczba wrogów w 1. fali</th><th>Fale (wrogów)</th><th>Prędkość</th><th>Typy wrogów</th><th>Przeszkody</th><th>Trudność</th></tr>
+  <tr><td>1 – Pierwszy kontakt</td><td>3</td><td>3 (3/4/5)</td><td>1,0</td><td>Dryfer, od 2. fali Łowca</td><td>2</td><td>łatwa</td></tr>
+  <tr><td>2 – Gniazdo łowców</td><td>6</td><td>3 (6/7/8)</td><td>1,3</td><td>Dryfer, Łowca, od 2. fali Strzelec</td><td>3</td><td>średnia</td></tr>
+  <tr><td>3 – Serce roju</td><td>10</td><td>3 (10/12/14)</td><td>1,6</td><td>wszystkie, szybszy ogień ×1,3</td><td>4</td><td>trudna</td></tr>
+</table>
+<p>Kolejny poziom odblokowuje się po ukończeniu poprzedniego, a informacja o odblokowaniu zapisuje się w pliku. Między poziomami gracz widzi podsumowanie z przyciskiem „Następny poziom”. Liczby wrogów w falach są wartościami bazowymi, które dodatkowo koryguje dynamiczna trudność (rozdz. 3.8).</p>
+
+<h2>3.7 Zwycięstwo i przegrana</h2>
+<ul>
+  <li><b>Zwycięstwo na poziomie:</b> pokonanie wszystkich wrogów ze wszystkich fal. Po poziomie 3 wyświetla się ekran „ZWYCIĘSTWO!” (scena GameOver w trybie wygranej).</li>
+  <li><b>Przegrana:</b> HP spada do 0, odtwarza się animacja śmierci (Animator: stan <i>Dead</i>), eksplozja i dźwięk, a po 1,6 s pojawia się ekran „KONIEC GRY” z wynikiem, rekordem, miejscem w rankingu i przyciskami „Spróbuj ponownie” oraz „Menu główne”.</li>
+  <li><b>Życie:</b> 3 HP (+1 za każdy poziom ulepszenia „Pancerz”, maks. 5).</li>
+</ul>
+
+<h2>3.8 Elementy rozszerzone</h2>
+<ul>
+  <li><b>Dynamiczna trudność</b>: co 4 s <code>DifficultyDirector</code> ocenia zdrowie gracza, liczbę pokonanych wrogów na minutę i czas od ostatniego trafienia, po czym przesuwa wskaźnik TEMPO w zakresie 0,8–1,4. TEMPO zmienia prędkość wrogów, odstęp między spawnami, szybkostrzelność Strzelców i liczebność kolejnych fal.</li>
+  <li><b>Proceduralne generowanie</b>: przy każdym starcie poziomu przeszkody (filary) losują się z ziarnem (rejection sampling z minimalnym odstępem i strefą bezpieczną wokół gracza), a skład każdej fali losuje się z wagami typów wrogów.</li>
+  <li><b>Sklep i waluta</b>: monety można wydać na skórki (4), broń (podwójne działo), ulepszenia (pancerz, szybkostrzelność, generator pulsu, magnes) oraz power-up „tarcza startowa”.</li>
+  <li><b>Misje</b>: zawsze 3 aktywne, np. „MISJA: Pokonaj 20 przeciwników – POSTĘP 13 / 20”, z nagrodą w monetach. Ukończona misja jest od razu zastępowana kolejną.</li>
+  <li><b>Osiągnięcia</b> (7) i <b>ranking</b> 10 najlepszych wyników z nazwą gracza, poziomem i datą.</li>
+</ul>
+</section>
